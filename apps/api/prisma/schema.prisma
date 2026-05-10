@@ -1,0 +1,477 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  nim          String?    @unique
+  name         String
+  email        String     @unique
+  phone        String?    // WhatsApp number
+  passwordHash String
+  isActive     Boolean    @default(true)
+  roles        UserRole[]
+  aspirations  Aspiration[]
+  statusLogs   StatusLog[]
+  auditLogs    AuditLog[]
+  notifications Notification[]
+  internalComments InternalComment[]
+  picQuestionnaires Questionnaire[] @relation("PicQuestionnaires")
+  news         News[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  lastLoginAt  DateTime?
+  verificationCode String?
+  isEmailVerified  Boolean    @default(false)
+
+  @@map("users")
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  users       UserRole[]
+  permissions RolePermission[]
+  createdAt   DateTime         @default(now())
+
+  @@map("roles")
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  resource    String
+  action      String
+  description String?
+  roles       RolePermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Aspiration {
+  id              String           @id @default(cuid())
+  aspirationCode  String           @unique // Format: MPA-YYYY-NNN
+  userId          String
+  topicId         String?          // Grouped topic
+  isAnonymous     Boolean          @default(false)
+  anonymousNim    String?          // encrypted, only if anonymous
+  title           String
+  description     String           @db.Text
+  categoryId      String
+  priorityScore   Float?
+  priorityLevel   PriorityLevel?
+  status          AspirationStatus @default(SUBMITTED)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  closedAt        DateTime?
+
+  user            User               @relation(fields: [userId], references: [id])
+  category        Category           @relation(fields: [categoryId], references: [id])
+  topic           Topic?             @relation(fields: [topicId], references: [id])
+  statusLogs      StatusLog[]
+  attachments     Attachment[]
+  validationForm  ValidationForm?
+  classificationForm ClassificationForm?
+  dispositions    Disposition[]
+  hearings        Hearing[]
+  monitoringLogs  MonitoringLog[]
+  survey          SatisfactionSurvey?
+  escalations     Escalation[]
+  internalComments InternalComment[]
+  internalAnalysis InternalAnalysis?
+
+  @@map("aspirations")
+}
+
+model Topic {
+  id              String           @id @default(cuid())
+  name            String
+  description     String?          @db.Text
+  aspirations     Aspiration[]
+  internalAnalysis InternalAnalysis?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("topics")
+}
+
+model InternalAnalysis {
+  id              String   @id @default(cuid())
+  aspirationId    String?  @unique
+  topicId         String?  @unique
+  notulensi       String   @db.Text
+  rekomendasi     String   @db.Text
+  rencanaAksi     String   @db.Text
+  analyzedBy      String   // User ID
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  aspiration      Aspiration? @relation(fields: [aspirationId], references: [id])
+  topic           Topic?      @relation(fields: [topicId], references: [id])
+
+  @@map("internal_analyses")
+}
+
+model InternalComment {
+  id           String   @id @default(cuid())
+  aspirationId String
+  userId       String
+  content      String   @db.Text
+  createdAt    DateTime @default(now())
+
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@map("internal_comments")
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  name        String
+  code        String       @unique
+  description String?
+  isActive    Boolean      @default(true)
+  aspirations Aspiration[]
+
+  @@map("categories")
+}
+
+model StatusLog {
+  id           String           @id @default(cuid())
+  aspirationId String
+  fromStatus   AspirationStatus
+  toStatus     AspirationStatus
+  changedById  String?
+  note         String?          @db.Text
+  createdAt    DateTime         @default(now())
+
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id])
+  changedBy    User?      @relation(fields: [changedById], references: [id])
+
+  @@map("status_logs")
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  aspirationId String
+  fileName     String
+  filePath     String
+  fileType     String
+  fileSize     Int
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id])
+
+  @@map("attachments")
+}
+
+model ValidationForm {
+  id           String     @id @default(cuid())
+  aspirationId String     @unique
+  criteria1    Boolean    @default(false)
+  criteria2    Boolean    @default(false)
+  criteria3    Boolean    @default(false)
+  criteria4    Boolean    @default(false)
+  criteria5    Boolean    @default(false)
+  notes        String?    @db.Text
+  decision     String?
+  validatedBy  String
+  createdAt    DateTime   @default(now())
+
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id])
+
+  @@map("validation_forms")
+}
+
+model ClassificationForm {
+  id           String   @id @default(cuid())
+  aspirationId String   @unique
+  param1       Int      // 1-5
+  param2       Int      // 1-5
+  param3       Int      // 1-5
+  param4       Int      // 1-5
+  param5       Int      // 1-5
+  param6       Int      // 1-5
+  totalScore   Float
+  level        PriorityLevel
+  notes        String?  @db.Text
+  classifiedBy String
+  createdAt    DateTime @default(now())
+
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id])
+
+  @@map("classification_forms")
+}
+
+model Disposition {
+  id             String   @id @default(cuid())
+  aspirationId   String
+  sentBy         String
+  sentTo         String   // user or role identifier
+  summary        String   @db.Text
+  recommendation String   @db.Text
+  deadline       DateTime
+  status         String
+  documentPath   String?
+  createdAt      DateTime @default(now())
+
+  aspiration     Aspiration @relation(fields: [aspirationId], references: [id])
+
+  @@map("dispositions")
+}
+
+model Hearing {
+  id           String   @id @default(cuid())
+  aspirationId String
+  scheduledAt  DateTime
+  location     String
+  participants Json     // Array of participant names/roles
+  agenda       String   @db.Text
+  minutesPath  String?
+  actionPlan   Json?    // Array of action items
+  createdAt    DateTime @default(now())
+
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id])
+
+  @@map("hearings")
+}
+
+model MonitoringLog {
+  id           String   @id @default(cuid())
+  aspirationId String
+  loggedBy     String
+  content      String   @db.Text
+  checkInDate  DateTime @default(now())
+  nextCheckIn  DateTime?
+  createdAt    DateTime @default(now())
+
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id])
+
+  @@map("monitoring_logs")
+}
+
+model SatisfactionSurvey {
+  id           String   @id @default(cuid())
+  aspirationId String   @unique
+  score        Int      // 1-5
+  comment      String?  @db.Text
+  submittedAt  DateTime @default(now())
+  isAnonymous  Boolean  @default(false)
+
+  aspiration   Aspiration @relation(fields: [aspirationId], references: [id])
+
+  @@map("satisfaction_surveys")
+}
+
+model Notification {
+  id           String   @id @default(cuid())
+  userId       String
+  type         String
+  title        String
+  body         String   @db.Text
+  isRead       Boolean  @default(false)
+  relatedId    String?
+  relatedType  String?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String
+  resource   String
+  resourceId String?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model Escalation {
+  id              String   @id @default(cuid())
+  aspirationId    String
+  triggeredBy     String
+  escalationLevel Int
+  reason          String   @db.Text
+  triggerType     String
+  assignedTo      String
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+
+  aspiration      Aspiration @relation(fields: [aspirationId], references: [id])
+
+  @@map("escalations")
+}
+
+enum AspirationStatus {
+  SUBMITTED
+  LOGGED
+  VALIDATING
+  VERIFIED
+  CLASSIFIED
+  ASSIGNED
+  IN_FOLLOW_UP
+  ESCALATED
+  RESOLVED
+  CLOSED
+  ARCHIVED
+  REJECTED
+}
+
+enum PriorityLevel {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum QuestionnaireType {
+  KSR_A // Pasca Proker / Pergerakan
+  KSR_B // Evaluasi Proker BPH
+  KSR_C // Mendadak / Cepat
+  KSR_D // Aspirasi Umum
+  KSR_E // Kepuasan Pelapor
+}
+
+enum QuestionnaireStatus {
+  DRAFT
+  UNDER_REVIEW
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Questionnaire {
+  id              String             @id @default(cuid())
+  type            QuestionnaireType
+  code            String             @unique // KSR-X-CODE
+  title           String
+  description     String?            @db.Text
+  formUrl         String?            // Link to Google Form (if external)
+  isInternal      Boolean            @default(false)
+  questions       Json?              // Array of question objects for internal forms
+  status          QuestionnaireStatus @default(DRAFT)
+  startDate       DateTime?
+  endDate         DateTime?
+  picId           String?
+  requestId       String?            @unique
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  pic             User?              @relation("PicQuestionnaires", fields: [picId], references: [id])
+  request         QuestionnaireRequest? @relation(fields: [requestId], references: [id])
+  analysis        QuestionnaireAnalysis?
+  responses       QuestionnaireResponse[]
+
+  @@map("questionnaires")
+}
+
+model News {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  imageUrl  String?
+  authorId  String
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User     @relation(fields: [authorId], references: [id])
+
+  @@map("news")
+}
+
+model QuestionnaireResponse {
+  id              String   @id @default(cuid())
+  questionnaireId String
+  respondentNim   String?
+  respondentName  String?
+  answers         Json     // Object mapping question IDs to answers
+  createdAt       DateTime @default(now())
+
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+
+  @@map("questionnaire_responses")
+}
+
+model QuestionnaireRequest {
+  id               String        @id @default(cuid())
+  requesterName    String
+  requesterRole    String
+  contactInfo      String
+  purpose          String        @db.Text
+  targetRespondent String
+  estimatedCount   Int?
+  requestedDeadline DateTime
+  status           RequestStatus @default(PENDING)
+  rejectionReason  String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  questionnaire    Questionnaire?
+
+  @@map("questionnaire_requests")
+}
+
+model QuestionnaireAnalysis {
+  id              String   @id @default(cuid())
+  questionnaireId String   @unique
+  summary         String   @db.Text
+  keyFindings     String   @db.Text
+  recommendations String   @db.Text
+  reportFileUrl   String?  // Link to PDF report
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+
+  @@map("questionnaire_analyses")
+}

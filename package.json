@@ -1,0 +1,34 @@
+{
+  "name": "siam-mpa-himakom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistem Informasi Aspirasi Mahasiswa MPA HIMAKOM POLBAN",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w apps/web",
+    "dev:api": "cross-env NODE_OPTIONS=--max-old-space-size=4096 npm run start:dev -w apps/api",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "prisma:generate": "npm run prisma generate -w apps/api",
+    "prisma:migrate": "npm run prisma migrate dev -w apps/api",
+    "prisma:seed": "ts-node apps/api/prisma/seed.ts"
+  },
+  "keywords": [],
+  "author": "MPA HIMAKOM POLBAN",
+  "license": "ISC",
+  "devDependencies": {
+    "@swc/cli": "^0.8.1",
+    "@swc/core": "^1.15.33",
+    "chokidar": "^5.0.0",
+    "cross-env": "^10.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "prisma": "^6.19.3"
+  }
+}

@@ -1,0 +1,435 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { toast } from 'sonner';
+import { Check, ChevronLeft, ChevronRight, Upload, UserCheck } from 'lucide-react';
+import api from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { useAuthStore } from '@/stores/auth-store';
+
+const formSchema = z.object({
+  // Identitas (Now read-only or confirmed from profile)
+  nim: z.string(),
+  name: z.string(),
+  email: z.string(),
+  isAnonymous: z.boolean(),
+  
+  // Step 2: Isi Aspirasi
+  title: z.string().min(5, 'Judul minimal 5 karakter'),
+  categoryId: z.string().min(1, 'Kategori wajib dipilih'),
+  description: z.string().min(50, 'Deskripsi minimal 50 karakter'),
+  attachments: z.array(z.object({
+    fileName: z.string(),
+    filePath: z.string(),
+    fileType: z.string(),
+    fileSize: z.number(),
+  })).optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+export default function CreateAspirationPage() {
+  const router = useRouter();
+  const { user } = useAuthStore();
+  const [step, setStep] = useState(1);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nim: user?.nim || '',
+      name: user?.name || '',
+      email: user?.email || '',
+      isAnonymous: false,
+      title: '',
+      categoryId: '',
+      description: '',
+      attachments: [],
+    },
+  });
+
+  // Sync user data once loaded
+  useEffect(() => {
+    if (user) {
+      form.setValue('nim', user.nim || '');
+      form.setValue('name', user.name);
+      form.setValue('email', user.email);
+    }
+  }, [user, form]);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await api.get('/categories');
+        setCategories(response.data);
+      } catch (error) {
+        toast.error('Gagal memuat kategori.');
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const uploadedAttachments: any[] = [...(form.getValues('attachments') || [])];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await api.post('/aspirations/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        uploadedAttachments.push({
+          fileName: file.name,
+          filePath: response.data.url,
+          fileType: file.type,
+          fileSize: file.size,
+        });
+      }
+      form.setValue('attachments', uploadedAttachments);
+      toast.success(`${files.length} file berhasil diunggah.`);
+    } catch (error) {
+      toast.error('Gagal mengunggah file.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const nextStep = async () => {
+    let fieldsToValidate: any[] = [];
+    if (step === 2) {
+      fieldsToValidate = ['title', 'categoryId', 'description'];
+    }
+
+    const isValid = await form.trigger(fieldsToValidate as any);
+    if (isValid) setStep((s) => s + 1);
+  };
+
+  const prevStep = () => setStep((s) => s - 1);
+
+  async function onSubmit(values: FormValues) {
+    setIsLoading(true);
+    try {
+      const response = await api.post('/aspirations', values);
+      toast.success('Aspirasi berhasil dikirim!');
+      router.push(`/aspirasi/tracking/${response.data.aspirationCode}`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Gagal mengirim aspirasi.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <ProtectedRoute>
+      <div className="max-w-2xl mx-auto py-4 md:py-8 px-4">
+        {/* Stepper UI - Mobile Friendly */}
+        <div className="mb-8 flex justify-between items-center relative max-w-md mx-auto">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex flex-col items-center z-10">
+              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                step === s ? 'border-primary bg-primary text-white scale-110 shadow-lg' : 
+                step > s ? 'border-primary bg-primary/20 text-primary' : 'border-muted text-muted-foreground bg-white'
+              }`}>
+                {step > s ? <Check className="w-5 h-5 md:w-6 md:h-6" /> : <span className="text-xs md:text-sm font-bold">{s}</span>}
+              </div>
+              <span className={`text-[10px] md:text-xs mt-2 font-bold uppercase tracking-tight ${
+                step === s ? 'text-primary' : 'text-muted-foreground'
+              }`}>
+                {s === 1 ? 'Privasi' : s === 2 ? 'Detail' : 'Review'}
+              </span>
+            </div>
+          ))}
+          <div className="absolute top-4 md:top-5 left-0 w-full h-[1px] md:h-[2px] bg-slate-200 -z-0"></div>
+        </div>
+
+        <Card className="border-none shadow-xl md:shadow-2xl md:border bg-white/50 backdrop-blur-sm">
+          <CardHeader className="space-y-1 pb-4 md:pb-6">
+            <CardTitle className="text-xl md:text-2xl font-black text-slate-900">
+              {step === 1 && 'Pengaturan Privasi'}
+              {step === 2 && 'Sampaikan Aspirasi'}
+              {step === 3 && 'Tinjau Laporan'}
+            </CardTitle>
+            <CardDescription className="text-sm">
+              {step === 1 && 'Konfirmasi identitas dan pilih opsi anonimitas.'}
+              {step === 2 && 'Jelaskan aspirasi atau keluhan Anda secara detail.'}
+              {step === 3 && 'Pastikan data sudah benar sebelum dikirim.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {step === 1 && (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-slate-900 text-white p-5 rounded-2xl shadow-lg flex items-start gap-4">
+                      <div className="bg-white/10 p-2.5 rounded-xl">
+                        <UserCheck className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-base font-black tracking-tight">{user?.name}</p>
+                        <p className="text-xs text-slate-300 font-medium">{user?.nim} • {user?.email}</p>
+                        <div className="flex items-center gap-1.5 mt-2 bg-white/10 w-fit px-2 py-0.5 rounded-md">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                          <p className="text-[10px] font-bold uppercase">Terverifikasi</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="isAnonymous"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border-2 p-5 transition-all hover:border-primary/50 bg-white">
+                          <div className="space-y-1 pr-4">
+                            <FormLabel className="text-base font-black text-slate-900">Kirim Anonim</FormLabel>
+                            <FormDescription className="text-xs leading-relaxed">
+                              Nama & NIM Anda akan disembunyikan dari staf. Hanya Ketua Komisi yang bisa melihat data asli Anda untuk validasi.
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              className="data-[state=checked]:bg-primary"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {step === 2 && (
+                  <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold text-slate-700">Judul Aspirasi</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Contoh: Keluhan Fasilitas Lab" 
+                              className="rounded-xl border-slate-200 focus:ring-primary h-11"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="categoryId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold text-slate-700">Kategori</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="rounded-xl border-slate-200 h-11">
+                                <SelectValue placeholder="Pilih kategori masalah" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="rounded-xl">
+                              {categories.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.id} className="rounded-lg">
+                                  {cat.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold text-slate-700">Detail Aspirasi</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Jelaskan secara detail... (minimal 50 karakter)" 
+                              className="min-h-[180px] rounded-xl border-slate-200 focus:ring-primary resize-none p-4"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <div className="flex justify-between items-center mt-1">
+                            <FormDescription className="text-[10px]">
+                              Berikan kronologi atau detail pendukung yang jelas.
+                            </FormDescription>
+                            <span className={`text-[10px] font-bold ${field.value.length >= 50 ? 'text-green-500' : 'text-slate-400'}`}>
+                              {field.value.length}/50
+                            </span>
+                          </div>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="space-y-3">
+                      <FormLabel className="font-bold text-slate-700">Lampiran Bukti (Opsional)</FormLabel>
+                      <div className="grid grid-cols-1 gap-3">
+                        <Input 
+                          type="file" 
+                          multiple 
+                          className="hidden" 
+                          id="file-upload" 
+                          onChange={handleFileUpload}
+                          disabled={uploading}
+                        />
+                        <label 
+                          htmlFor="file-upload" 
+                          className="flex flex-col items-center justify-center gap-2 px-4 py-8 bg-slate-50 hover:bg-slate-100 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer transition-all hover:border-primary group"
+                        >
+                          <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                            <Upload className="w-5 h-5 text-primary" />
+                          </div>
+                          <span className="text-xs font-bold text-slate-600">
+                            {uploading ? 'Sedang Mengunggah...' : 'Klik untuk Pilih File atau Foto'}
+                          </span>
+                          <span className="text-[10px] text-slate-400">PDF, JPG, PNG (Maks 10MB)</span>
+                        </label>
+                        
+                        {(form.watch('attachments') ?? []).length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {(form.watch('attachments') ?? []).map((file: any, i: number) => (
+                              <Badge key={i} variant="secondary" className="px-3 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                                {file.fileName.length > 15 ? file.fileName.substring(0, 12) + '...' : file.fileName}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === 3 && (
+                  <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="rounded-2xl border-2 border-slate-100 overflow-hidden bg-slate-50/50">
+                      <div className="bg-slate-100 px-5 py-3 border-b flex justify-between items-center">
+                        <span className="text-xs font-black uppercase text-slate-500 tracking-widest">Ringkasan Laporan</span>
+                        <Badge className={form.watch('isAnonymous') ? 'bg-orange-500' : 'bg-green-500'}>
+                          {form.watch('isAnonymous') ? 'Anonim' : 'Publik'}
+                        </Badge>
+                      </div>
+                      <div className="p-5 space-y-4">
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Judul</p>
+                          <p className="text-base font-bold text-slate-900 leading-tight">{form.watch('title')}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Kategori</p>
+                            <Badge variant="outline" className="font-bold border-primary/20 text-primary">
+                              {categories.find(c => c.id === form.watch('categoryId'))?.name}
+                            </Badge>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Lampiran</p>
+                            <p className="text-sm font-bold text-slate-700">{form.watch('attachments')?.length || 0} File</p>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Deskripsi</p>
+                          <p className="text-sm text-slate-600 leading-relaxed line-clamp-4 italic">
+                            "{form.watch('description')}"
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex gap-3 items-start">
+                      <div className="bg-blue-100 p-1.5 rounded-full mt-0.5">
+                        <Check className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <p className="text-[11px] text-blue-800 leading-relaxed font-medium">
+                        Dengan menekan tombol kirim, Anda menyatakan bahwa data yang diberikan adalah benar dan bersedia untuk dikonfirmasi oleh Komisi Aspirasi jika diperlukan.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-between gap-3 pt-4 border-t">
+                  {step > 1 ? (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={prevStep} 
+                      className="rounded-xl px-6 font-bold text-slate-600 hover:bg-slate-50 h-12"
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-1" /> Kembali
+                    </Button>
+                  ) : (
+                    <div></div>
+                  )}
+                  
+                  {step < 3 ? (
+                    <Button 
+                      type="button" 
+                      onClick={nextStep} 
+                      className="rounded-xl px-8 font-black shadow-lg shadow-primary/20 hover:shadow-xl transition-all h-12"
+                    >
+                      Lanjut <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="submit" 
+                      disabled={isLoading}
+                      className="rounded-xl px-10 font-black shadow-lg shadow-primary/30 hover:shadow-2xl transition-all bg-primary h-12"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                          Mengirim...
+                        </div>
+                      ) : (
+                        'Kirim Aspirasi Sekarang'
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </ProtectedRoute>
+  );
+}
