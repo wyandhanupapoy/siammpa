@@ -61,6 +61,7 @@ export default function CreateAspirationPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadingProgress] = useState(0);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -102,16 +103,26 @@ export default function CreateAspirationPage() {
     if (!files || files.length === 0) return;
 
     setUploading(true);
+    setUploadingProgress(0);
     const uploadedAttachments: any[] = [...(form.getValues('attachments') || [])];
 
     try {
-      for (let i = 0; i < files.length; i++) {
+      const totalFiles = files.length;
+      for (let i = 0; i < totalFiles; i++) {
         const file = files[i];
         const formData = new FormData();
         formData.append('file', file);
 
         const response = await api.post('/aspirations/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
+          onUploadProgress: (progressEvent) => {
+            const fileProgress = progressEvent.total 
+              ? Math.round((progressEvent.loaded * 100) / progressEvent.total) 
+              : 0;
+            // Overall progress based on current file and total files
+            const totalProgress = Math.round(((i * 100) + fileProgress) / totalFiles);
+            setUploadingProgress(totalProgress);
+          }
         });
 
         uploadedAttachments.push({
@@ -120,13 +131,19 @@ export default function CreateAspirationPage() {
           fileType: file.type,
           fileSize: file.size,
         });
+        
+        // Ensure progress hits 100% for this file
+        setUploadingProgress(Math.round(((i + 1) * 100) / totalFiles));
       }
       form.setValue('attachments', uploadedAttachments);
       toast.success(`${files.length} file berhasil diunggah.`);
-    } catch (error) {
-      toast.error('Gagal mengunggah file.');
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Gagal mengunggah file.';
+      toast.error(errorMsg);
+      console.error('Upload error:', error);
     } finally {
       setUploading(false);
+      setUploadingProgress(0);
     }
   };
 
@@ -315,8 +332,21 @@ export default function CreateAspirationPage() {
                         />
                         <label 
                           htmlFor="file-upload" 
-                          className="flex flex-col items-center justify-center gap-2 px-4 py-8 bg-slate-50 hover:bg-slate-100 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer transition-all hover:border-primary group"
+                          className="flex flex-col items-center justify-center gap-2 px-4 py-8 bg-slate-50 hover:bg-slate-100 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer transition-all hover:border-primary group relative overflow-hidden"
                         >
+                          {uploading && (
+                            <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-4">
+                              <div className="w-full max-w-[200px] bg-slate-100 h-2 rounded-full overflow-hidden mb-2">
+                                <div 
+                                  className="bg-primary h-full transition-all duration-300 ease-out" 
+                                  style={{ width: `${uploadProgress}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-[10px] font-black text-primary uppercase tracking-widest animate-pulse">
+                                Mengunggah ({uploadProgress}%)
+                              </span>
+                            </div>
+                          )}
                           <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform">
                             <Upload className="w-5 h-5 text-primary" />
                           </div>

@@ -43,13 +43,14 @@ export function NewsFeed() {
         <Link key={item.id} href={`/news/${item.id}`} className="group flex-shrink-0 min-w-[300px] md:min-w-0">
           <Card className="h-full overflow-hidden hover:shadow-2xl transition-all duration-500 border-none shadow-lg flex flex-col rounded-[2.5rem] bg-white border border-slate-100/50">
             <div className="relative h-56 w-full overflow-hidden bg-slate-100">
-              {item.imageUrl ? (
-                <img 
-                  src={item.imageUrl} 
-                  alt={item.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              ) : (
+                {item.imageUrl ? (
+                  <img 
+                    src={item.imageUrl} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    style={{ objectPosition: 'center' }}
+                  />
+                ) : (
                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                   <ImageIcon className="w-12 h-12" />
                 </div>
