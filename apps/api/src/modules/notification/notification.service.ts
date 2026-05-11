@@ -28,54 +28,86 @@ export class NotificationService {
           user: this.configService.get<string>('SMTP_USER'),
           pass: this.configService.get<string>('SMTP_PASS'),
         },
-        // Force IPv4 at the socket level — prevents ENETUNREACH on IPv6-disabled containers
+        // Aggressive IPv4 forcing
         family: 4,
+        dnsOptions: { family: 4, all: false },
         tls: {
+          // Do not fail on invalid certs
           rejectUnauthorized: false,
           servername: smtpHost,
+          // Explicitly set min version
+          minVersion: 'TLSv1.2',
         },
-        // Also force IPv4 in DNS resolution
-        dnsOptions: { family: 4, all: false },
-        connectionTimeout: 30000,
-        greetingTimeout: 30000,
-        socketTimeout: 30000,
-        logger: false,
-        debug: false,
+        connectionTimeout: 20000,
+        greetingTimeout: 20000,
+        socketTimeout: 20000,
       } as any);
-      this.logger.log(`SMTP transporter configured: ${smtpHost}:${smtpPort} (IPv4 forced)`);
+      this.logger.log(
+        `SMTP transporter initialized for ${smtpHost}:${smtpPort} (Forcing IPv4)`,
+      );
     }
   }
 
-  /**
-   * Mengirim pesan WhatsApp via Fonnte
-   * Menggunakan mekanisme try-catch agar tidak merusak alur sistem jika gagal
-   */
   async sendWhatsApp(target: string, message: string) {
     if (!this.fonnteToken) {
-      this.logger.warn('WhatsApp notification skipped: FONNTE_TOKEN not configured.');
+      this.logger.warn(
+        'WhatsApp notification skipped: FONNTE_TOKEN not configured.',
+      );
       return;
     }
 
-    // Bersihkan nomor (harus diawali 62)
-    let formattedPhone = target.replace(/[^0-9]/g, '');
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = '62' + formattedPhone.slice(1);
+    if (!target) {
+      this.logger.warn(
+        'WhatsApp notification skipped: Target phone number is empty.',
+      );
+      return;
     }
 
+    // Bersihkan nomor
+    let formattedPhone = target.replace(/[^0-9]/g, '');
+
+    // Konversi format 08... ke 628...
+    if (formattedPhone.startsWith('0')) {
+      formattedPhone = '62' + formattedPhone.slice(1);
+    } else if (formattedPhone.startsWith('8')) {
+      formattedPhone = '62' + formattedPhone;
+    }
+
+    this.logger.log(`Attempting to send WhatsApp to ${formattedPhone}...`);
+
     try {
-      await axios.post('https://api.fonnte.com/send', {
-        target: formattedPhone,
-        message: message,
-        countryCode: '62',
-      }, {
-        headers: {
-          Authorization: this.fonnteToken,
+      const response = await axios.post(
+        'https://api.fonnte.com/send',
+        {
+          target: formattedPhone,
+          message: message,
+          countryCode: '62',
         },
-      });
-      this.logger.log(`WhatsApp sent successfully to ${formattedPhone}`);
+        {
+          headers: {
+            Authorization: this.fonnteToken.trim(),
+          },
+          timeout: 10000,
+        },
+      );
+
+      if (response.data.status === true) {
+        this.logger.log(
+          `WhatsApp sent successfully to ${formattedPhone}. ID: ${response.data.id || 'N/A'}`,
+        );
+      } else {
+        this.logger.error(
+          `Fonnte rejected message to ${formattedPhone}: ${response.data.reason || 'Unknown error'}`,
+        );
+      }
     } catch (error: any) {
-      // Log error tapi JANGAN throw exception agar sistem utama tidak berhenti
-      this.logger.error(`Failed to send WhatsApp to ${formattedPhone}: ${error.response?.data?.reason || error.message}`);
+      const errorDetail =
+        error.response?.data?.reason ||
+        error.response?.data?.message ||
+        error.message;
+      this.logger.error(
+        `Failed to send WhatsApp to ${formattedPhone}: ${errorDetail}`,
+      );
     }
   }
 
