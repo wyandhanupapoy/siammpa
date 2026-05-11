@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Search, ShieldCheck, FileQuestion, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, Search, ShieldCheck, FileQuestion, ArrowRight, Zap, CheckCircle2, Phone, Mail, Instagram } from 'lucide-react';
 import { NewsFeed } from '@/components/news-feed';
 import { PublicStats } from '@/components/public-stats';
 
@@ -179,6 +179,71 @@ export default function Home() {
                 <span className="font-black text-slate-900 text-[10px] md:text-sm uppercase tracking-wider">{step.label}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Support Section */}
+      <section className="container mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-5xl mx-auto space-y-8 md:space-y-10">
+          <div className="text-center space-y-2 md:space-y-4">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900">Layanan Bantuan & Kontak</h2>
+            <p className="text-xs md:text-sm text-slate-500 font-medium px-4">Punya pertanyaan atau kendala? Hubungi tim kami melalui jalur di bawah ini.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {/* WhatsApp Contacts */}
+            <a href="https://wa.me/6281324707985" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-slate-100 hover:border-green-200 hover:shadow-xl hover:shadow-green-500/10 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Phone className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">Gharin Fawwaz</h3>
+                <p className="text-sm text-slate-500 font-medium">WhatsApp</p>
+              </div>
+            </a>
+            
+            <a href="https://wa.me/6285798040463" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-slate-100 hover:border-green-200 hover:shadow-xl hover:shadow-green-500/10 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Phone className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">Hilmi Farhat</h3>
+                <p className="text-sm text-slate-500 font-medium">WhatsApp</p>
+              </div>
+            </a>
+
+            <a href="https://wa.me/62882002589783" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-slate-100 hover:border-green-200 hover:shadow-xl hover:shadow-green-500/10 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Phone className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">Fadil</h3>
+                <p className="text-sm text-slate-500 font-medium">WhatsApp</p>
+              </div>
+            </a>
+
+            {/* Email Contact */}
+            <a href="mailto:wyandhanupapoy@gmail.com" className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-slate-100 hover:border-red-200 hover:shadow-xl hover:shadow-red-500/10 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Mail className="w-6 h-6" />
+              </div>
+              <div className="overflow-hidden">
+                <h3 className="font-bold text-slate-900 truncate">Email Resmi</h3>
+                <p className="text-sm text-slate-500 font-medium truncate">wyandhanupapoy@gmail.com</p>
+              </div>
+            </a>
+
+            {/* Instagram Contact */}
+            <a href="https://instagram.com/mpahimakom" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-slate-100 hover:border-fuchsia-200 hover:shadow-xl hover:shadow-fuchsia-500/10 transition-all group lg:col-span-2">
+              <div className="w-12 h-12 rounded-2xl bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Instagram className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">Instagram</h3>
+                <p className="text-sm text-slate-500 font-medium">@mpahimakom</p>
+              </div>
+            </a>
           </div>
         </div>
       </section>
