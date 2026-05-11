@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import axios from 'axios';
-import * as dns from 'dns';
 
 @Injectable()
 export class NotificationService {
@@ -25,19 +24,21 @@ export class NotificationService {
           user: this.configService.get<string>('SMTP_USER'),
           pass: this.configService.get<string>('SMTP_PASS'),
         },
-        tls: { 
+        // Force IPv4 at the socket level — prevents ENETUNREACH on IPv6-disabled containers
+        family: 4,
+        tls: {
           rejectUnauthorized: false,
-          // Explicitly tell TLS to use IPv4
-          servername: smtpHost
+          servername: smtpHost,
         },
-        // Force IPv4 and bypass IPv6 completely using custom lookup
-        lookup: (hostname, options, callback) => {
-          dns.lookup(hostname, { family: 4 }, callback);
-        },
-        connectionTimeout: 30000, // Increased timeout
+        // Also force IPv4 in DNS resolution
+        dnsOptions: { family: 4, all: false },
+        connectionTimeout: 30000,
         greetingTimeout: 30000,
         socketTimeout: 30000,
+        logger: false,
+        debug: false,
       } as any);
+      this.logger.log(`SMTP transporter configured: ${smtpHost}:${smtpPort} (IPv4 forced)`);
     }
   }
 
