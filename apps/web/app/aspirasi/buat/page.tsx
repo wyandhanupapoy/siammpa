@@ -41,9 +41,9 @@ const formSchema = z.object({
   isAnonymous: z.boolean(),
   
   // Step 2: Isi Aspirasi
-  title: z.string().min(5, 'Judul minimal 5 karakter'),
+  title: z.string().min(1, 'Judul wajib diisi'),
   categoryId: z.string().min(1, 'Kategori wajib dipilih'),
-  description: z.string().min(50, 'Deskripsi minimal 50 karakter'),
+  description: z.string().min(1, 'Deskripsi wajib diisi'),
   attachments: z.array(z.object({
     fileName: z.string(),
     filePath: z.string(),
@@ -284,7 +284,9 @@ export default function CreateAspirationPage() {
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="rounded-xl border-slate-200 h-11">
-                                <SelectValue placeholder="Pilih kategori masalah" />
+                                <SelectValue placeholder="Pilih kategori masalah">
+                                  {field.value ? categories.find(c => c.id === field.value)?.name : undefined}
+                                </SelectValue>
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-xl">
@@ -307,7 +309,7 @@ export default function CreateAspirationPage() {
                           <FormLabel className="font-bold text-slate-700">Detail Aspirasi</FormLabel>
                           <FormControl>
                             <Textarea 
-                              placeholder="Jelaskan secara detail... (minimal 50 karakter)" 
+                              placeholder="Jelaskan secara detail..." 
                               className="min-h-[180px] rounded-xl border-slate-200 focus:ring-primary resize-none p-4"
                               {...field} 
                             />
@@ -316,9 +318,6 @@ export default function CreateAspirationPage() {
                             <FormDescription className="text-[10px]">
                               Berikan kronologi atau detail pendukung yang jelas.
                             </FormDescription>
-                            <span className={`text-[10px] font-bold ${field.value.length >= 50 ? 'text-green-500' : 'text-slate-400'}`}>
-                              {field.value.length}/50
-                            </span>
                           </div>
                           <FormMessage className="text-xs" />
                         </FormItem>

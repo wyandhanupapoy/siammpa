@@ -13,7 +13,6 @@ export class CreateAspirationDto {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(50)
   description: string;
 
   @IsNotEmpty()

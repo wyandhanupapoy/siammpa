@@ -99,20 +99,27 @@ export default function ClassificationForm({ aspirationId, onSuccess }: Classifi
               name={p.id as any}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold">{p.label}</FormLabel>
+                  <FormLabel className="text-xs font-semibold">{p.label}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue />
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue>
+                          {field.value ? `Skor ${field.value}` : undefined}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {[1, 2, 3, 4, 5].map((v) => (
-                        <SelectItem key={v} value={v.toString()}>{v}</SelectItem>
+                      {[1, 2, 3, 4, 5].map((val) => (
+                        <SelectItem key={val} value={val.toString()}>
+                          Skor {val}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription className="text-[10px]">{p.description}</FormDescription>
+                  <FormDescription className="text-[10px] leading-tight">
+                    {p.description}
+                  </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />

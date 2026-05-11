@@ -40,13 +40,6 @@ export class AspirationService {
       );
     }
 
-    // FR-02-05: Minimal 50 karakter deskripsi
-    if (createAspirationDto.description.length < 50) {
-      throw new BadRequestException(
-        'Deskripsi aspirasi terlalu singkat. Minimal 50 karakter diperlukan.',
-      );
-    }
-
     const reporterNim = user.nim;
     const aspirationCode = await this.generateAspirationCode();
 
