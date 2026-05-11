@@ -99,7 +99,7 @@ export function PublicStats() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-2 md:p-8">
-          <div className="h-[180px] md:h-[300px] w-full">
+          <div className="h-[200px] md:h-[350px] w-full min-h-[200px] md:min-h-[350px]">
             {isMounted && data.categories.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.categories} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
