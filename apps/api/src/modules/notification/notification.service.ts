@@ -1,14 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
 import axios from 'axios';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
-  private transporter: nodemailer.Transporter | null = null;
   private readonly fonnteToken: string | undefined;
+  private readonly brevoApiKey: string | undefined;
 
   constructor(
     private configService: ConfigService,
@@ -21,46 +20,12 @@ export class NotificationService {
       this.logger.warn('Fonnte Token NOT found in configuration');
     }
     
-    const smtpHost = this.configService.get<string>('SMTP_HOST');
-    const smtpPort = this.configService.get<number>('SMTP_PORT', 587);
+    this.brevoApiKey = this.configService.get<string>('BREVO_API_KEY');
 
-    if (smtpHost) {
-      this.transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpPort === 465, // true for 465, false for other ports
-        auth: {
-          user: this.configService.get<string>('SMTP_USER'),
-          pass: this.configService.get<string>('SMTP_PASS'),
-        },
-        pool: true, // Use pooled connections
-        maxConnections: 5,
-        maxMessages: 100,
-        // Aggressive IPv4 forcing
-        family: 4,
-        dnsOptions: { family: 4, all: false },
-        tls: {
-          rejectUnauthorized: false,
-          servername: smtpHost,
-          minVersion: 'TLSv1.2',
-        },
-        connectionTimeout: 10000, // 10s
-        greetingTimeout: 10000,
-        socketTimeout: 15000,
-      } as any);
-
-      // Verify connection on startup
-      this.transporter.verify((error) => {
-        if (error) {
-          this.logger.error(
-            `SMTP Connection Error: ${error.message}. Port ${smtpPort} might be blocked by the host.`,
-          );
-        } else {
-          this.logger.log(
-            `SMTP server is ready to take our messages (${smtpHost}:${smtpPort})`,
-          );
-        }
-      });
+    if (this.brevoApiKey) {
+      this.logger.log('Brevo REST API initialized for email delivery (bypassing strict SMTP limitations).');
+    } else {
+      this.logger.warn('BREVO_API_KEY not found. Email notifications will be skipped or mocked.');
     }
   }
 
@@ -129,21 +94,35 @@ export class NotificationService {
   }
 
   async sendEmail(to: string, subject: string, body: string) {
-    // ... (existing implementation)
-    if (!this.transporter) {
+    if (!this.brevoApiKey) {
       this.logger.log(`[DEV MODE] Email to: ${to} | Subject: ${subject}`);
       return;
     }
 
     try {
-      await this.transporter.sendMail({
-        from: `"SIAM MPA HIMAKOM" <${this.configService.get<string>('SMTP_FROM')}>`,
-        to,
-        subject,
-        html: body,
-      });
-    } catch (error) {
-      this.logger.error(`Failed to send email to ${to}`, error);
+      const fromEmail = this.configService.get<string>('SMTP_FROM') || 'noreply@siammpa.com';
+      const fromName = 'SIAM MPA HIMAKOM';
+
+      const response = await axios.post(
+        'https://api.brevo.com/v3/smtp/email',
+        {
+          sender: { name: fromName, email: fromEmail },
+          to: [{ email: to }],
+          subject: subject,
+          htmlContent: body,
+        },
+        {
+          headers: {
+            'api-key': this.brevoApiKey,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      this.logger.log(`Email sent successfully via Brevo to ${to} (MessageId: ${response.data?.messageId})`);
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || error.message;
+      this.logger.error(`Failed to send email to ${to} via Brevo: ${errorMsg}`);
     }
   }
 
