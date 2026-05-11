@@ -14,29 +14,34 @@ export function NewsFeed() {
     queryKey: ['latest-news'],
     queryFn: async () => {
       const response = await api.get('/news');
-      return response.data.slice(0, 3); // Only show top 3 on home page
+      return response.data.slice(0, 5); // Menampilkan 5 berita terbaru
     },
   });
 
   if (isLoading) {
     return (
-      <div className="grid md:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-[350px] w-full rounded-xl" />
+      <div className="flex overflow-x-auto pb-6 -mx-4 px-4 md:grid md:grid-cols-3 md:overflow-visible gap-6 no-scrollbar">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Skeleton key={i} className="h-[400px] min-w-[280px] md:min-w-0 w-full rounded-[2rem] flex-shrink-0" />
         ))}
       </div>
     );
   }
 
   if (!news || news.length === 0) {
-    return null; // Don't show the section if no news
+    return (
+      <div className="text-center py-12 bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
+        <Newspaper className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <p className="text-slate-500 font-medium">Belum ada berita terbaru saat ini.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="flex overflow-x-auto pb-6 -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible gap-6 no-scrollbar">
       {news.map((item: any) => (
-        <Link key={item.id} href={`/news/${item.id}`} className="group">
-          <Card className="h-full overflow-hidden hover:shadow-2xl transition-all duration-500 border-none shadow-lg flex flex-col rounded-[2rem] bg-white">
+        <Link key={item.id} href={`/news/${item.id}`} className="group flex-shrink-0 min-w-[300px] md:min-w-0">
+          <Card className="h-full overflow-hidden hover:shadow-2xl transition-all duration-500 border-none shadow-lg flex flex-col rounded-[2.5rem] bg-white border border-slate-100/50">
             <div className="relative h-56 w-full overflow-hidden bg-slate-100">
               {item.imageUrl ? (
                 <img 
