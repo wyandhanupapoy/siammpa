@@ -56,43 +56,26 @@ export class NotificationService {
       return;
     }
 
-    if (!target) {
-      this.logger.warn('WhatsApp notification skipped: Target phone number is empty.');
-      return;
-    }
-
-    // Bersihkan nomor
+    // Bersihkan nomor (harus diawali 62)
     let formattedPhone = target.replace(/[^0-9]/g, '');
-    
-    // Konversi format 08... ke 628...
     if (formattedPhone.startsWith('0')) {
       formattedPhone = '62' + formattedPhone.slice(1);
-    } else if (formattedPhone.startsWith('8')) {
-      formattedPhone = '62' + formattedPhone;
     }
 
-    this.logger.log(`Attempting to send WhatsApp to ${formattedPhone}...`);
-
     try {
-      const response = await axios.post('https://api.fonnte.com/send', {
+      await axios.post('https://api.fonnte.com/send', {
         target: formattedPhone,
         message: message,
         countryCode: '62',
       }, {
         headers: {
-          Authorization: this.fonnteToken.trim(),
+          Authorization: this.fonnteToken,
         },
-        timeout: 10000, // 10 seconds timeout
       });
-
-      if (response.data.status === true) {
-        this.logger.log(`WhatsApp sent successfully to ${formattedPhone}. Message ID: ${response.data.id || 'N/A'}`);
-      } else {
-        this.logger.error(`Fonnte rejected WhatsApp to ${formattedPhone}: ${response.data.reason || 'Unknown error'}`);
-      }
+      this.logger.log(`WhatsApp sent successfully to ${formattedPhone}`);
     } catch (error: any) {
-      const errorDetail = error.response?.data?.reason || error.response?.data?.message || error.message;
-      this.logger.error(`Failed to send WhatsApp to ${formattedPhone}: ${errorDetail}`);
+      // Log error tapi JANGAN throw exception agar sistem utama tidak berhenti
+      this.logger.error(`Failed to send WhatsApp to ${formattedPhone}: ${error.response?.data?.reason || error.message}`);
     }
   }
 

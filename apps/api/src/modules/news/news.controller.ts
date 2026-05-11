@@ -37,40 +37,24 @@ export class NewsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    try {
-      const news = await this.prisma.news.findUnique({
-        where: { id },
-        include: {
-          author: { select: { name: true } },
-          comments: {
-            include: {
-              user: { select: { name: true } },
-            },
-            orderBy: { createdAt: 'desc' },
+    return this.prisma.news.findUnique({
+      where: { id },
+      include: {
+        author: { select: { name: true } },
+        comments: {
+          include: {
+            user: { select: { name: true } },
           },
-          _count: {
-            select: {
-              reactions: true,
-              comments: true,
-            },
+          orderBy: { createdAt: 'desc' },
+        },
+        _count: {
+          select: {
+            reactions: true,
+            comments: true,
           },
         },
-      });
-
-      if (!news) {
-        throw new BadRequestException('Berita tidak ditemukan');
-      }
-
-      return news;
-    } catch (error) {
-      // If table doesn't exist, Prisma will throw an error
-      if (error.code === 'P2021') {
-        throw new BadRequestException(
-          'Database belum diperbarui. Harap jalankan migrasi database di server.',
-        );
-      }
-      throw error;
-    }
+      },
+    });
   }
 
   @Get(':id/reactions')

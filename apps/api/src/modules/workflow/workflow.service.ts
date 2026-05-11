@@ -131,8 +131,6 @@ export class WorkflowService {
         // Find phone number from user data if it exists or use email
         const userPhone = (aspiration.user as any).phone || null;
 
-        console.log(`Sending notification for ${aspiration.aspirationCode} to ${aspiration.user.email} (Phone: ${userPhone})`);
-        
         this.notification
           .notifyStatusChange(
             aspiration.user.email,
@@ -141,8 +139,7 @@ export class WorkflowService {
             note,
             userPhone,
           )
-          .then(() => console.log(`Notification request queued for ${aspiration.aspirationCode}`))
-          .catch((err) => console.error(`Notification delivery failed for ${aspiration.aspirationCode}:`, err));
+          .catch((err) => console.error('Notification error:', err));
 
         // SOP KSR-E: trigger survey when RESOLVED
         if (toStatus === AspirationStatus.RESOLVED) {

@@ -12,7 +12,12 @@ import { Server, Socket } from 'socket.io';
 @WebSocketGateway({
   cors: {
     origin: '*',
+    methods: ['GET', 'POST'],
+    credentials: true,
   },
+  transports: ['polling', 'websocket'], // Ensure polling-first for better compatibility with proxies
+  pingTimeout: 60000,
+  pingInterval: 25000,
 })
 export class NotificationGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
