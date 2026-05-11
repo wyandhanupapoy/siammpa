@@ -195,6 +195,9 @@ export class UserController {
         await tx.internalComment.deleteMany({
           where: { aspirationId: { in: aspIds } },
         });
+        await tx.internalAnalysis.deleteMany({
+          where: { aspirationId: { in: aspIds } },
+        });
 
         // Final delete for aspirations
         await tx.aspiration.deleteMany({ where: { id: { in: aspIds } } });
@@ -206,6 +209,15 @@ export class UserController {
       await tx.notification.deleteMany({ where: { userId: id } });
       await tx.auditLog.deleteMany({ where: { userId: id } });
       await tx.userRole.deleteMany({ where: { userId: id } });
+      await tx.newsReaction.deleteMany({ where: { userId: id } });
+      await tx.newsComment.deleteMany({ where: { userId: id } });
+
+      const newsIds = await tx.news.findMany({ where: { authorId: id } }).then(n => n.map(x => x.id));
+      if (newsIds.length > 0) {
+        await tx.newsReaction.deleteMany({ where: { newsId: { in: newsIds } } });
+        await tx.newsComment.deleteMany({ where: { newsId: { in: newsIds } } });
+        await tx.news.deleteMany({ where: { authorId: id } });
+      }
 
       // 4. Finally delete the user
       return tx.user.delete({ where: { id } });
