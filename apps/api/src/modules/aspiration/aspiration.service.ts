@@ -5,6 +5,8 @@ import { AspirationStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { WorkflowService } from '../workflow/workflow.service';
 import { EncryptionService } from '../auth/encryption.service';
+import { ConfigService } from '@nestjs/config';
+import { NotificationService } from '../notification/notification.service';
 
 import { AuditService } from '../audit/audit.service';
 
@@ -15,6 +17,8 @@ export class AspirationService {
     private workflow: WorkflowService,
     private encryption: EncryptionService,
     private audit: AuditService,
+    private notificationService: NotificationService,
+    private configService: ConfigService,
   ) {}
 
   async create(createAspirationDto: CreateAspirationDto, targetUserId: string) {
@@ -46,7 +50,7 @@ export class AspirationService {
     const reporterNim = user.nim;
     const aspirationCode = await this.generateAspirationCode();
 
-    return this.prisma.aspiration.create({
+    const result = await this.prisma.aspiration.create({
       data: {
         aspirationCode,
         title: createAspirationDto.title,
@@ -71,6 +75,25 @@ export class AspirationService {
         },
       },
     });
+
+    if (user.phone) {
+      const waMessage = 
+`✅ *ASPIRASI BERHASIL DIKIRIM*
+
+Halo ${user.name}, aspirasi Anda dengan judul *"${createAspirationDto.title}"* telah masuk ke sistem kami.
+
+*Kode:* ${aspirationCode}
+*Status:* SUBMITTED
+
+Pantau perkembangannya melalui:
+${this.configService.get('FRONTEND_URL')}/aspirasi/tracking/${aspirationCode}
+
+_Pesan otomatis SIAM MPA HIMAKOM POLBAN._`;
+      
+      this.notificationService.sendWhatsApp(user.phone, waMessage);
+    }
+
+    return result;
   }
 
   async findAll() {
