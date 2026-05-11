@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Search, ShieldCheck, FileQuestion, ArrowRight, Zap, CheckCircle2, Phone, Mail, Instagram } from 'lucide-react';
+import { MessageSquare, Search, ShieldCheck, FileQuestion, ArrowRight, Zap, CheckCircle2, Phone, Mail, AtSign } from 'lucide-react';
 import { NewsFeed } from '@/components/news-feed';
 import { PublicStats } from '@/components/public-stats';
 
@@ -235,9 +235,9 @@ export default function Home() {
             </a>
 
             {/* Instagram Contact */}
-            <a href="https://instagram.com/mpahimakom" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-slate-100 hover:border-fuchsia-200 hover:shadow-xl hover:shadow-fuchsia-500/10 transition-all group lg:col-span-2">
+            <a href="https://instagram.com/mpahimakom" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-5 rounded-3xl bg-white border border-slate-100 hover:border-fuchsia-200 hover:shadow-xl hover:shadow-fuchsia-500/10 transition-all group md:col-span-2 lg:col-span-2">
               <div className="w-12 h-12 rounded-2xl bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Instagram className="w-6 h-6" />
+                <AtSign className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="font-bold text-slate-900">Instagram</h3>
