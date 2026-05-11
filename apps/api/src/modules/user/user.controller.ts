@@ -221,6 +221,8 @@ export class UserController {
 
       // 4. Finally delete the user
       return tx.user.delete({ where: { id } });
+    }, {
+      timeout: 45000, // Tambahan timeout untuk query yang berat
     });
   }
 }
