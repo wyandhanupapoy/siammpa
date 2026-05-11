@@ -28,28 +28,39 @@ export class NotificationService {
       this.transporter = nodemailer.createTransport({
         host: smtpHost,
         port: smtpPort,
-        secure: smtpPort === 465,
+        secure: smtpPort === 465, // true for 465, false for other ports
         auth: {
           user: this.configService.get<string>('SMTP_USER'),
           pass: this.configService.get<string>('SMTP_PASS'),
         },
+        pool: true, // Use pooled connections
+        maxConnections: 5,
+        maxMessages: 100,
         // Aggressive IPv4 forcing
         family: 4,
         dnsOptions: { family: 4, all: false },
         tls: {
-          // Do not fail on invalid certs
           rejectUnauthorized: false,
           servername: smtpHost,
-          // Explicitly set min version
           minVersion: 'TLSv1.2',
         },
-        connectionTimeout: 20000,
-        greetingTimeout: 20000,
-        socketTimeout: 20000,
+        connectionTimeout: 10000, // 10s
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
       } as any);
-      this.logger.log(
-        `SMTP transporter initialized for ${smtpHost}:${smtpPort} (Forcing IPv4)`,
-      );
+
+      // Verify connection on startup
+      this.transporter.verify((error) => {
+        if (error) {
+          this.logger.error(
+            `SMTP Connection Error: ${error.message}. Port ${smtpPort} might be blocked by the host.`,
+          );
+        } else {
+          this.logger.log(
+            `SMTP server is ready to take our messages (${smtpHost}:${smtpPort})`,
+          );
+        }
+      });
     }
   }
 
