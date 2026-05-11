@@ -228,7 +228,11 @@ export default function CreateAspirationPage() {
                           <div className="flex items-center gap-1.5 mt-1.5 md:mt-2 bg-white/10 w-fit px-2 py-0.5 rounded-md">
                             <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-green-400 animate-pulse"></span>
                             <p className="text-[8px] md:text-[10px] font-bold uppercase text-white">Terverifikasi</p>
-                      control={form.control}
+                          </div>
+                        </div>
+                      </div>
+
+                      <FormField
                       name="isAnonymous"
                       render={({ field }) => (
                         <div className="space-y-4">
