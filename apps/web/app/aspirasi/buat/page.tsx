@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { Check, ChevronLeft, ChevronRight, Upload, UserCheck } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Upload, UserCheck, ShieldCheck } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
@@ -236,21 +236,39 @@ export default function CreateAspirationPage() {
                       control={form.control}
                       name="isAnonymous"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border-2 p-4 md:p-5 transition-all hover:border-primary/50 bg-white">
-                          <div className="space-y-0.5 md:space-y-1 pr-4">
-                            <FormLabel className="text-sm md:text-base font-black text-slate-900">Kirim Anonim</FormLabel>
-                            <FormDescription className="text-[10px] md:text-xs leading-relaxed">
-                              Identitas Anda akan disembunyikan dari staf pengelola.
-                            </FormDescription>
+                        <div className="space-y-4">
+                          <FormItem className="flex flex-row items-center justify-between rounded-2xl border-2 p-4 md:p-5 transition-all hover:border-primary/50 bg-white">
+                            <div className="space-y-0.5 md:space-y-1 pr-4">
+                              <FormLabel className="text-sm md:text-base font-black text-slate-900">Kirim Anonim</FormLabel>
+                              <FormDescription className="text-[10px] md:text-xs leading-relaxed">
+                                Identitas Anda akan disembunyikan dari staf pengelola.
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="data-[state=checked]:bg-primary scale-90 md:scale-100"
+                              />
+                            </FormControl>
+                          </FormItem>
+
+                          <div className="bg-emerald-50/50 p-4 md:p-6 rounded-[1.5rem] border border-emerald-100 flex gap-4 items-start shadow-sm">
+                            <div className="bg-emerald-100 p-2 md:p-2.5 rounded-xl shrink-0 text-emerald-600">
+                              <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" />
+                            </div>
+                            <div className="space-y-1 md:space-y-1.5">
+                              <h4 className="text-xs md:text-sm font-black text-emerald-900 uppercase tracking-tight">Jaminan Privasi MPA</h4>
+                              <p className="text-[10px] md:text-xs text-emerald-700 leading-relaxed font-medium">
+                                Sistem kami menggunakan enkripsi tingkat tinggi untuk mengamankan data Anda. 
+                                {field.value 
+                                  ? " Identitas Anda hanya dapat dibuka oleh Ketua Komisi melalui mekanisme audit ketat jika terjadi laporan yang melanggar hukum serius."
+                                  : " Nama dan NIM Anda akan tercantum secara resmi pada laporan guna mempercepat proses konfirmasi lapangan."
+                                }
+                              </p>
+                            </div>
                           </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              className="data-[state=checked]:bg-primary scale-90 md:scale-100"
-                            />
-                          </FormControl>
-                        </FormItem>
+                        </div>
                       )}
                     />
                   </div>

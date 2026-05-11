@@ -52,9 +52,17 @@ export class AspirationController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
   @Get(':id/reveal-identity')
-  async revealIdentity(@Param('id') id: string) {
+  async revealIdentity(@Param('id') id: string, @Request() req) {
     const aspiration = await this.aspirationService.findById(id);
     if (!aspiration) throw new NotFoundException('Aspiration not found');
+
+    // Audit the reveal action
+    await this.aspirationService.auditIdentityReveal(
+      id,
+      req.user.id,
+      aspiration.aspirationCode,
+    );
+
     return {
       nim: aspiration.user.nim,
       name: aspiration.user.name,
@@ -96,6 +104,67 @@ export class AspirationController {
     @Request() req,
   ) {
     return this.workflowService.transitionStatus(id, toStatus, req.user.id, note);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Get(':id/monitoring')
+  async getMonitoring(@Param('id') id: string) {
+    return this.aspirationService.getMonitoringLogs(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Post(':id/monitoring')
+  async addMonitoring(
+    @Param('id') id: string,
+    @Body('content') content: string,
+    @Request() req,
+  ) {
+    return this.aspirationService.addMonitoringLog(id, req.user.id, content);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Get(':id/hearings')
+  async getHearings(@Param('id') id: string) {
+    return this.aspirationService.getHearings(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Post(':id/hearings')
+  async addHearing(@Param('id') id: string, @Body() data: any) {
+    return this.aspirationService.addHearing(id, data);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Get(':id/comments')
+  async getComments(@Param('id') id: string) {
+    return this.aspirationService.getInternalComments(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Post(':id/comments')
+  async addComment(
+    @Param('id') id: string,
+    @Body('content') content: string,
+    @Request() req,
+  ) {
+    return this.aspirationService.addInternalComment(id, req.user.id, content);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Post(':id/escalate')
+  async escalate(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @Request() req,
+  ) {
+    return this.aspirationService.escalate(id, req.user.id, reason);
   }
 
   @Post(':id/survey')

@@ -43,4 +43,44 @@ export class UserService {
       where,
     });
   }
+
+  async findAll() {
+    return this.prisma.user.findMany({
+      include: {
+        roles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async updateRoles(userId: string, roleNames: string[]) {
+    return this.prisma.$transaction(async (tx) => {
+      // Delete existing roles
+      await tx.userRole.deleteMany({
+        where: { userId },
+      });
+
+      // Find role IDs
+      const roles = await tx.role.findMany({
+        where: { name: { in: roleNames } },
+      });
+
+      // Create new roles
+      await tx.userRole.createMany({
+        data: roles.map((role) => ({
+          userId,
+          roleId: role.id,
+        })),
+      });
+
+      return tx.user.findUnique({
+        where: { id: userId },
+        include: { roles: { include: { role: true } } },
+      });
+    });
+  }
 }

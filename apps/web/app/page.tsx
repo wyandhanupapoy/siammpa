@@ -2,7 +2,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Search, ShieldCheck, FileQuestion, ArrowRight, Zap, CheckCircle2, Phone, Mail, AtSign } from 'lucide-react';
+import { MessageSquare, Search, ShieldCheck, FileQuestion, ArrowRight, Zap, CheckCircle2, Phone, Mail, AtSign, HelpCircle, ChevronDown, TrendingUp } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { NewsFeed } from '@/components/news-feed';
 import { PublicStats } from '@/components/public-stats';
 
@@ -161,22 +167,54 @@ export default function Home() {
 
       {/* Trust / Process Section */}
       <section className="container mx-auto px-4 py-8 md:py-12">
-        <div className="max-w-4xl mx-auto text-center space-y-8 md:space-y-12">
+        <div className="max-w-6xl mx-auto text-center space-y-8 md:space-y-16">
           <div className="space-y-2 md:space-y-4">
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900">Alur Kerja Kami</h2>
-            <p className="text-xs md:text-sm text-slate-500 font-medium px-4">Setiap aspirasi melewati tahapan baku untuk menjamin kualitas solusi.</p>
+            <Badge className="bg-primary/10 text-primary border-none mb-2">Transparansi Proses</Badge>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">Langkah Aspirasimu</h2>
+            <p className="text-sm md:text-lg text-slate-500 font-medium max-w-2xl mx-auto">Kami memastikan setiap laporan ditangani dengan standar operasional yang profesional dan akuntabel.</p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+            {/* Connection Line (Desktop) */}
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -z-10"></div>
+            
             {[
-              { label: "Validasi", icon: CheckCircle2 },
-              { label: "Klasifikasi", icon: CheckCircle2 },
-              { label: "Disposisi", icon: CheckCircle2 },
-              { label: "Tuntas", icon: CheckCircle2 },
+              { 
+                label: "Penyampaian", 
+                desc: "Aspirasi masuk dan divalidasi keabsahannya oleh admin.",
+                icon: MessageSquare,
+                color: "bg-blue-500"
+              },
+              { 
+                label: "Pengkajian", 
+                desc: "Tim Komisi Aspirasi melakukan kajian internal & scoring prioritas.",
+                icon: Search,
+                color: "bg-indigo-500"
+              },
+              { 
+                label: "Disposisi", 
+                desc: "Diteruskan ke PIC/BPH terkait untuk tindak lanjut operasional.",
+                icon: Zap,
+                color: "bg-orange-500"
+              },
+              { 
+                label: "Penyelesaian", 
+                desc: "Status selesai dan pelapor memberikan feedback kepuasan.",
+                icon: CheckCircle2,
+                color: "bg-emerald-500"
+              },
             ].map((step, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 md:gap-3 p-4 md:p-6 rounded-3xl bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:shadow-xl group">
-                <step.icon className="w-6 h-6 md:w-8 md:h-8 text-primary group-hover:scale-110 transition-transform" />
-                <span className="font-black text-slate-900 text-[10px] md:text-sm uppercase tracking-wider">{step.label}</span>
+              <div key={i} className="flex flex-col items-center gap-4 group">
+                <div className={`w-16 h-16 rounded-2xl ${step.color} text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-500 relative`}>
+                  <step.icon className="w-8 h-8" />
+                  <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white text-slate-900 flex items-center justify-center text-xs font-black shadow-md border border-slate-100">
+                    {i + 1}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-black text-slate-900 text-base md:text-lg uppercase tracking-tight">{step.label}</h3>
+                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed px-4 md:px-0">{step.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -248,8 +286,112 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer Info - Clean and minimal */}
-      <section className="container mx-auto px-4">
+      {/* Impact Section - Building Trust through success stories */}
+      <section className="bg-slate-900 py-16 md:py-24 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 -skew-x-12 translate-x-1/4"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
+              <Badge className="bg-primary text-white border-none">Cerita Perubahan</Badge>
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight">
+                Setiap Suara <br />
+                <span className="text-primary">Membawa Dampak</span>
+              </h2>
+              <p className="text-slate-400 text-lg font-medium leading-relaxed">
+                SIAM MPA bukan sekadar kotak saran. Kami adalah jembatan antara keresahan Mahasiswa dan solusi nyata dari organisasi.
+              </p>
+              <div className="space-y-4">
+                {[
+                  "95% Aspirasi direspon dalam < 48 jam",
+                  "Transparansi penuh melalui kode tracking",
+                  "Identitas anonim dijamin sistem audit"
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 text-white font-bold">
+                    <div className="bg-primary/20 p-1 rounded-full">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    </div>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:gap-6 animate-in fade-in slide-in-from-right-8 duration-700 delay-200">
+              {[
+                {
+                  quote: "Masalah fasilitas lab yang sudah lama dikeluhkan akhirnya diperbaiki dalam seminggu setelah melapor lewat SIAM MPA.",
+                  author: "Mahasiswa Angkatan 22",
+                  tag: "Fasilitas"
+                },
+                {
+                  quote: "Awalnya ragu lapor masalah akademik, tapi mode anonim bikin saya berani. Respon Komisi Aspirasi sangat solutif.",
+                  author: "Mahasiswa Angkatan 21",
+                  tag: "Akademik"
+                }
+              ].map((story, i) => (
+                <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] hover:bg-white/10 transition-all">
+                  <div className="space-y-4">
+                    <Badge variant="outline" className="text-primary border-primary/30 uppercase text-[9px] font-black">{story.tag}</Badge>
+                    <p className="text-white text-base md:text-lg italic font-medium leading-relaxed">
+                      "{story.quote}"
+                    </p>
+                    <div className="flex items-center gap-3 pt-2">
+                      <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center">
+                        <User className="w-5 h-5 text-slate-500" />
+                      </div>
+                      <span className="text-sm font-black text-slate-300">{story.author}</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="container mx-auto px-4 py-8 md:py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center space-y-4 mb-12">
+            <Badge className="bg-slate-100 text-slate-600 border-none mb-2">Pusat Bantuan</Badge>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">Paling Sering Ditanyakan</h2>
+            <p className="text-sm md:text-lg text-slate-500 font-medium">Masih ragu untuk melapor? Temukan jawaban atas kegelisahanmu di sini.</p>
+          </div>
+
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            {[
+              {
+                q: "Apakah identitas saya benar-benar aman jika memilih mode Anonim?",
+                a: "Ya. Dalam mode anonim, sistem mengenkripsi data identitas Anda. Staf pengolah aspirasi hanya melihat kode unik laporan. Identitas hanya bisa dibuka melalui mekanisme audit ketat jika laporan mengandung ancaman serius atau pelanggaran hukum berat."
+              },
+              {
+                q: "Berapa lama aspirasi saya akan ditindaklanjuti?",
+                a: "Sesuai SOP kami, setiap aspirasi akan divalidasi dalam maksimal 2x24 jam kerja. Anda dapat memantau progres secara real-time melalui halaman tracking menggunakan kode aspirasi yang didapatkan."
+              },
+              {
+                q: "Siapa saja yang akan membaca aspirasi saya?",
+                a: "Aspirasi Anda awalnya divalidasi oleh Admin MPA. Setelah itu, akan diteruskan ke Komisi Aspirasi yang relevan dengan bidang masalah yang Anda laporkan (misal: Komisi Fasilitas, Komisi Akademik, dll)."
+              },
+              {
+                q: "Apa yang harus saya siapkan sebelum melapor?",
+                a: "Cukup siapkan deskripsi masalah yang jelas dan kronologis. Sangat disarankan untuk melampirkan bukti pendukung seperti foto, tangkapan layar, atau dokumen PDF guna mempercepat proses pengkajian."
+              }
+            ].map((faq, i) => (
+              <AccordionItem key={i} value={`item-${i}`} className="border rounded-2xl px-6 bg-white shadow-sm hover:shadow-md transition-all">
+                <AccordionTrigger className="text-left font-black text-slate-900 hover:no-underline py-6">
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-slate-600 leading-relaxed pb-6 font-medium">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* Footer / CTA Section */}
+      <section className="container mx-auto px-4 py-12 md:py-24">
         <div className="bg-slate-50 p-8 md:p-16 rounded-[2.5rem] border border-slate-100">
           <div className="max-w-3xl mx-auto space-y-4 md:space-y-6 text-center">
             <div className="flex justify-center mb-2 md:mb-4">

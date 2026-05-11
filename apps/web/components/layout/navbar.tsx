@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, LayoutDashboard, Search, Newspaper, LogOut, User, LogIn, UserPlus } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Search, Newspaper, LogOut, User, LogIn, UserPlus, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import {
   Sheet,
@@ -71,6 +71,10 @@ export default function Navbar() {
 
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
+              <Link href="/dashboard/notifications" className="relative p-2 text-muted-foreground hover:text-primary transition-colors">
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              </Link>
               <Link 
                 href={dashboardLink.href} 
                 className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${

@@ -6,12 +6,15 @@ import * as bcrypt from 'bcrypt';
 import { WorkflowService } from '../workflow/workflow.service';
 import { EncryptionService } from '../auth/encryption.service';
 
+import { AuditService } from '../audit/audit.service';
+
 @Injectable()
 export class AspirationService {
   constructor(
     private prisma: PrismaService,
     private workflow: WorkflowService,
     private encryption: EncryptionService,
+    private audit: AuditService,
   ) {}
 
   async create(createAspirationDto: CreateAspirationDto, targetUserId: string) {
@@ -95,6 +98,7 @@ export class AspirationService {
         category: true,
         attachments: true,
         user: true,
+        topic: true,
         statusLogs: {
           include: {
             changedBy: true,
@@ -107,6 +111,96 @@ export class AspirationService {
         dispositions: true,
         survey: true,
       },
+    });
+  }
+
+  async getMonitoringLogs(aspirationId: string) {
+    return this.prisma.monitoringLog.findMany({
+      where: { aspirationId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async addMonitoringLog(aspirationId: string, userId: string, content: string) {
+    return this.prisma.monitoringLog.create({
+      data: {
+        aspirationId,
+        loggedBy: userId,
+        content,
+      },
+    });
+  }
+
+  async getHearings(aspirationId: string) {
+    return this.prisma.hearing.findMany({
+      where: { aspirationId },
+      orderBy: { scheduledAt: 'desc' },
+    });
+  }
+
+  async addHearing(aspirationId: string, data: any) {
+    return this.prisma.hearing.create({
+      data: {
+        aspirationId,
+        scheduledAt: new Date(data.scheduledAt),
+        location: data.location,
+        participants: data.participants,
+        agenda: data.agenda,
+      },
+    });
+  }
+
+  async getInternalComments(aspirationId: string) {
+    return this.prisma.internalComment.findMany({
+      where: { aspirationId },
+      include: {
+        user: {
+          select: { name: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async addInternalComment(
+    aspirationId: string,
+    userId: string,
+    content: string,
+  ) {
+    return this.prisma.internalComment.create({
+      data: {
+        aspirationId,
+        userId,
+        content,
+      },
+      include: {
+        user: {
+          select: { name: true },
+        },
+      },
+    });
+  }
+
+  async escalate(aspirationId: string, userId: string, reason: string) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.escalation.create({
+        data: {
+          aspirationId,
+          triggeredBy: userId,
+          reason,
+          escalationLevel: 1,
+          triggerType: 'MANUAL',
+          assignedTo: 'KETUA_MPA',
+        },
+      });
+
+      return this.workflow.transitionStatus(
+        aspirationId,
+        AspirationStatus.ESCALATED,
+        userId,
+        `Manual escalation: ${reason}`,
+        tx,
+      );
     });
   }
 
@@ -163,6 +257,16 @@ export class AspirationService {
         'Survey submitted by user',
         tx,
       );
+    });
+  }
+
+  async auditIdentityReveal(aspirationId: string, userId: string, code: string) {
+    return this.audit.log({
+      userId,
+      action: 'IDENTITY_REVEAL',
+      resource: 'aspiration',
+      resourceId: aspirationId,
+      newValue: { reason: 'Admin requested identity reveal', code },
     });
   }
 

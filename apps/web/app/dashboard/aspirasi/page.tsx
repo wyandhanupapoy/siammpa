@@ -24,11 +24,21 @@ export default function AspirationListPage() {
   const queryClient = useQueryClient();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
 
   const { data: aspirations, isLoading } = useQuery({
     queryKey: ['aspirations'],
     queryFn: async () => {
       const response = await api.get('/aspirations');
+      return response.data;
+    },
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await api.get('/categories');
       return response.data;
     },
   });
@@ -54,10 +64,16 @@ export default function AspirationListPage() {
 
   if (isLoading) return <div className="p-8">Memuat daftar aspirasi...</div>;
 
-  const filteredAspirations = aspirations?.filter((a: any) => 
-    a.title.toLowerCase().includes(search.toLowerCase()) || 
-    a.aspirationCode.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredAspirations = aspirations?.filter((a: any) => {
+    const matchesSearch = 
+      a.title.toLowerCase().includes(search.toLowerCase()) || 
+      a.aspirationCode.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'ALL' || a.status === statusFilter;
+    const matchesCategory = categoryFilter === 'ALL' || a.categoryId === categoryFilter;
+
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => 
@@ -81,16 +97,43 @@ export default function AspirationListPage() {
           <p className="text-muted-foreground text-sm">Kelola dan tindak lanjuti suara mahasiswa JTK.</p>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Cari aspirasi..."
-              className="pl-9 h-9"
+              className="pl-9 h-9 rounded-lg"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+
+          <select 
+            value={statusFilter} 
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-9 rounded-lg border border-input bg-background px-3 py-1 text-xs shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="ALL">Semua Status</option>
+            <option value="SUBMITTED">SUBMITTED</option>
+            <option value="VERIFIED">VERIFIED</option>
+            <option value="CLASSIFIED">CLASSIFIED</option>
+            <option value="ASSIGNED">ASSIGNED</option>
+            <option value="IN_FOLLOW_UP">IN_FOLLOW_UP</option>
+            <option value="RESOLVED">RESOLVED</option>
+            <option value="CLOSED">CLOSED</option>
+            <option value="REJECTED">REJECTED</option>
+          </select>
+
+          <select 
+            value={categoryFilter} 
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="h-9 rounded-lg border border-input bg-background px-3 py-1 text-xs shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="ALL">Semua Kategori</option>
+            {categories?.map((c: any) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
           
           {selectedIds.length > 0 && (
             <DropdownMenu>

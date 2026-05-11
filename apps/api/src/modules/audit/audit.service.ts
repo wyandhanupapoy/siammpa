@@ -35,4 +35,28 @@ export class AuditService {
       this.logger.error('Failed to create audit log', error);
     }
   }
+
+  async findAll() {
+    return this.prisma.auditLog.findMany({
+      include: {
+        user: {
+          select: { name: true, email: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  async findByResource(resource: string, resourceId: string) {
+    return this.prisma.auditLog.findMany({
+      where: { resource, resourceId },
+      include: {
+        user: {
+          select: { name: true, email: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

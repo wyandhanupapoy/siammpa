@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import axios from 'axios';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class NotificationService {
@@ -9,7 +10,10 @@ export class NotificationService {
   private transporter: nodemailer.Transporter | null = null;
   private readonly fonnteToken: string | undefined;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private prisma: PrismaService,
+  ) {
     this.fonnteToken = this.configService.get<string>('FONNTE_TOKEN');
     
     const smtpHost = this.configService.get<string>('SMTP_HOST');
@@ -156,6 +160,47 @@ Terima kasih atas partisipasi Anda!
 
       this.sendWhatsApp(phone, waMessage);
     }
+  }
+
+  async createNotification(params: {
+    userId: string;
+    type: string;
+    title: string;
+    body: string;
+    relatedId?: string;
+    relatedType?: string;
+  }) {
+    return this.prisma.notification.create({
+      data: {
+        userId: params.userId,
+        type: params.type,
+        title: params.title,
+        body: params.body,
+        relatedId: params.relatedId,
+        relatedType: params.relatedType,
+      },
+    });
+  }
+
+  async findAllForUser(userId: string) {
+    return this.prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async markAsRead(id: string) {
+    return this.prisma.notification.update({
+      where: { id },
+      data: { isRead: true },
+    });
+  }
+
+  async markAllAsRead(userId: string) {
+    return this.prisma.notification.updateMany({
+      where: { userId, isRead: false },
+      data: { isRead: true },
+    });
   }
 }
 

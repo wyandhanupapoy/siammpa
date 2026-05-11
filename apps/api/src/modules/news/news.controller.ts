@@ -39,8 +39,119 @@ export class NewsController {
   async findOne(@Param('id') id: string) {
     return this.prisma.news.findUnique({
       where: { id },
-      include: { author: { select: { name: true } } },
+      include: {
+        author: { select: { name: true } },
+        comments: {
+          include: {
+            user: { select: { name: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+        _count: {
+          select: {
+            reactions: true,
+            comments: true,
+          },
+        },
+      },
     });
+  }
+
+  @Get(':id/reactions')
+  async getReactions(@Param('id') id: string) {
+    const reactions = await this.prisma.newsReaction.groupBy({
+      by: ['type'],
+      where: { newsId: id },
+      _count: true,
+    });
+
+    return reactions.reduce((acc: any, curr) => {
+      acc[curr.type] = curr._count;
+      return acc;
+    }, { LIKE: 0, DISLIKE: 0 });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/react')
+  async react(
+    @Param('id') id: string,
+    @Body('type') type: 'LIKE' | 'DISLIKE',
+    @Request() req,
+  ) {
+    const userId = req.user.id;
+    
+    // Check if reaction exists
+    const existing = await this.prisma.newsReaction.findUnique({
+      where: { newsId_userId: { newsId: id, userId } },
+    });
+
+    if (existing) {
+      if (existing.type === type) {
+        // Remove reaction if same type (toggle)
+        return this.prisma.newsReaction.delete({
+          where: { id: existing.id },
+        });
+      } else {
+        // Update reaction if different type
+        return this.prisma.newsReaction.update({
+          where: { id: existing.id },
+          data: { type },
+        });
+      }
+    }
+
+    return this.prisma.newsReaction.create({
+      data: {
+        newsId: id,
+        userId,
+        type,
+      },
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/comments')
+  async addComment(
+    @Param('id') id: string,
+    @Body('content') content: string,
+    @Request() req,
+  ) {
+    return this.prisma.newsComment.create({
+      data: {
+        newsId: id,
+        userId: req.user.id,
+        content,
+      },
+      include: {
+        user: { select: { name: true } },
+      },
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('comments/:commentId')
+  async removeComment(
+    @Param('commentId') commentId: string,
+    @Request() req,
+  ) {
+    const comment = await this.prisma.newsComment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!comment) throw new BadRequestException('Komentar tidak ditemukan');
+    
+    // Only author or admin can delete
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: { roles: { include: { role: true } } },
+    });
+    const isAdmin = user?.roles.some(r => r.role.name === 'ADMIN');
+
+    if (comment.userId !== req.user.id && !isAdmin) {
+      throw new BadRequestException('Tidak memiliki akses untuk menghapus komentar ini');
+    }
+
+    return this.prisma.newsComment.delete({ where: { id: commentId } });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

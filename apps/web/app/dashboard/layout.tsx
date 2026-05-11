@@ -16,6 +16,7 @@ const sidebarItems = [
   { name: 'Berita Aspirasi', href: '/admin/news', icon: Newspaper, roles: ['KOMISI_ASPIRASI', 'KETUA_KOMISI', 'KETUA_MPA', 'ADMIN'] },
   { name: 'Kuesioner', href: '/dashboard/kuesioner', icon: ClipboardList, roles: ['KOMISI_ASPIRASI', 'KETUA_KOMISI', 'KETUA_MPA', 'ADMIN'] },
   { name: 'SLA Monitor', href: '/dashboard/sla', icon: BarChart2, roles: ['KOMISI_ASPIRASI', 'KETUA_KOMISI', 'KETUA_MPA', 'ADMIN'] },
+  { name: 'Manajemen User', href: '/dashboard/users', icon: User, roles: ['ADMIN'] },
   { name: 'Profil Saya', href: '/dashboard/profile', icon: User, roles: ['KOMISI_ASPIRASI', 'KETUA_KOMISI', 'KETUA_MPA', 'ADMIN', 'MAHASISWA', 'EKSEKUTIF_BPH'] },
   { name: 'Admin Panel', href: '/admin', icon: ShieldCheck, roles: ['ADMIN'] },
 ];

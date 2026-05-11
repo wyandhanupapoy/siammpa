@@ -30,6 +30,8 @@ model User {
   internalComments InternalComment[]
   picQuestionnaires Questionnaire[] @relation("PicQuestionnaires")
   news         News[]
+  newsComments NewsComment[]
+  newsReactions NewsReaction[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   lastLoginAt  DateTime?
@@ -440,8 +442,43 @@ model News {
   updatedAt DateTime @updatedAt
 
   author    User     @relation(fields: [authorId], references: [id])
+  comments  NewsComment[]
+  reactions NewsReaction[]
 
   @@map("news")
+}
+
+model NewsComment {
+  id        String   @id @default(cuid())
+  newsId    String
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  news      News     @relation(fields: [newsId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("news_comments")
+}
+
+model NewsReaction {
+  id        String   @id @default(cuid())
+  newsId    String
+  userId    String
+  type      ReactionType
+  createdAt DateTime @default(now())
+
+  news      News     @relation(fields: [newsId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([newsId, userId])
+  @@map("news_reactions")
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
 }
 
 model QuestionnaireResponse {

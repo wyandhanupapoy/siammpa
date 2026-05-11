@@ -6,10 +6,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Newspaper, Calendar, User, ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { Newspaper, Calendar, User, ArrowRight, Image as ImageIcon, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 export default function NewsPage() {
+  const [search, setSearch] = useState('');
+
   const { data: news, isLoading } = useQuery({
     queryKey: ['public-news'],
     queryFn: async () => {
@@ -17,6 +21,11 @@ export default function NewsPage() {
       return response.data;
     },
   });
+
+  const filteredNews = news?.filter((item: any) => 
+    item.title.toLowerCase().includes(search.toLowerCase()) || 
+    item.content.toLowerCase().includes(search.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -36,16 +45,27 @@ export default function NewsPage() {
 
   return (
     <div className="container mx-auto py-12 space-y-12">
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Berita & Informasi</h1>
-        <p className="text-xl text-muted-foreground max-w-3xl">
-          Pantau progres penanganan aspirasi dan informasi terbaru dari Komisi Aspirasi MPA HIMAKOM POLBAN.
-        </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="space-y-4">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900">Berita & Informasi</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl font-medium">
+            Pantau progres penanganan aspirasi dan informasi terbaru dari Komisi Aspirasi MPA HIMAKOM POLBAN.
+          </p>
+        </div>
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input 
+            placeholder="Cari berita..." 
+            className="pl-10 h-12 rounded-2xl border-slate-200 shadow-sm focus:ring-primary"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
-      {news && news.length > 0 ? (
+      {filteredNews && filteredNews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {news.map((item: any) => (
+          {filteredNews.map((item: any) => (
             <Card key={item.id} className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all flex flex-col h-full bg-white">
               <div className="relative h-56 w-full overflow-hidden">
                 {item.imageUrl ? (
