@@ -176,53 +176,58 @@ export default function CreateAspirationPage() {
     <ProtectedRoute>
       <div className="max-w-2xl mx-auto py-4 md:py-8 px-4">
         {/* Stepper UI - Mobile Friendly */}
-        <div className="mb-6 md:mb-8 flex justify-between items-center relative max-w-md mx-auto px-2">
+        <div className="mb-6 md:mb-10 flex justify-between items-center relative max-w-sm mx-auto px-4">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex flex-col items-center z-10">
-              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                step === s ? 'border-primary bg-primary text-white scale-110 shadow-lg' : 
-                step > s ? 'border-primary bg-primary/20 text-primary' : 'border-muted text-muted-foreground bg-white'
+              <div className={`w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                step === s ? 'border-primary bg-primary text-white scale-110 shadow-lg ring-4 ring-primary/10' : 
+                step > s ? 'border-primary bg-primary/10 text-primary' : 'border-muted text-muted-foreground bg-white'
               }`}>
-                {step > s ? <Check className="w-4 h-4 md:w-6 md:h-6" /> : <span className="text-xs md:text-sm font-bold">{s}</span>}
+                {step > s ? <Check className="w-5 h-5 md:w-6 md:h-6" /> : <span className="text-sm md:text-base font-bold">{s}</span>}
               </div>
-              <span className={`text-[9px] md:text-xs mt-1.5 font-black uppercase tracking-tighter md:tracking-tight ${
+              <span className={`text-[9px] md:text-xs mt-2 font-black uppercase tracking-widest ${
                 step === s ? 'text-primary' : 'text-muted-foreground'
-              }`}>
+              } hidden sm:block`}>
+                {s === 1 ? 'Privasi' : s === 2 ? 'Isi Aspirasi' : 'Kirim'}
+              </span>
+              <span className={`text-[8px] mt-1.5 font-black uppercase tracking-tighter ${
+                step === s ? 'text-primary' : 'text-muted-foreground'
+              } sm:hidden`}>
                 {s === 1 ? 'Privasi' : s === 2 ? 'Isi' : 'Kirim'}
               </span>
             </div>
           ))}
-          <div className="absolute top-4 md:top-5 left-0 w-full h-[1px] md:h-[2px] bg-slate-100 -z-0"></div>
+          <div className="absolute top-4.5 md:top-6 left-0 w-full h-[2px] bg-slate-100 -z-0"></div>
         </div>
 
         <Card className="border-none shadow-xl md:shadow-2xl md:border bg-white/80 backdrop-blur-md rounded-[2rem]">
-          <CardHeader className="space-y-1 p-6 md:p-8 pb-2 md:pb-4">
-            <CardTitle className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+          <CardHeader className="space-y-1 p-5 md:p-8 pb-1 md:pb-4">
+            <CardTitle className="text-lg md:text-2xl font-black text-slate-900 tracking-tight">
               {step === 1 && 'Pengaturan Privasi'}
               {step === 2 && 'Sampaikan Aspirasi'}
               {step === 3 && 'Tinjau Laporan'}
             </CardTitle>
-            <CardDescription className="text-xs md:text-sm font-medium">
+            <CardDescription className="text-[10px] md:text-sm font-medium">
               {step === 1 && 'Pilih bagaimana identitas Anda ditampilkan.'}
               {step === 2 && 'Jelaskan aspirasi Anda secara detail.'}
               {step === 3 && 'Pastikan data sudah benar sebelum dikirim.'}
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-6 md:p-8 pt-4">
+          <CardContent className="p-5 md:p-8 pt-2">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
                 {step === 1 && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-slate-900 text-white p-5 rounded-2xl shadow-lg flex items-start gap-4">
-                      <div className="bg-white/10 p-2.5 rounded-xl">
-                        <UserCheck className="w-6 h-6 text-white" />
+                  <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-slate-900 text-white p-4 md:p-5 rounded-2xl shadow-lg flex items-start gap-3 md:gap-4">
+                      <div className="bg-white/10 p-2 md:p-2.5 rounded-xl shrink-0">
+                        <UserCheck className="w-5 h-5 md:w-6 md:h-6 text-white" />
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-base font-black tracking-tight">{user?.name}</p>
-                        <p className="text-xs text-slate-300 font-medium">{user?.nim} • {user?.email}</p>
-                        <div className="flex items-center gap-1.5 mt-2 bg-white/10 w-fit px-2 py-0.5 rounded-md">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                          <p className="text-[10px] font-bold uppercase">Terverifikasi</p>
+                      <div className="space-y-0.5 md:space-y-1">
+                        <p className="text-sm md:text-base font-black tracking-tight">{user?.name}</p>
+                        <p className="text-[10px] md:text-xs text-slate-300 font-medium">{user?.nim} • {user?.email}</p>
+                        <div className="flex items-center gap-1.5 mt-1.5 md:mt-2 bg-white/10 w-fit px-2 py-0.5 rounded-md">
+                          <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                          <p className="text-[8px] md:text-[10px] font-bold uppercase">Terverifikasi</p>
                         </div>
                       </div>
                     </div>
@@ -231,18 +236,18 @@ export default function CreateAspirationPage() {
                       control={form.control}
                       name="isAnonymous"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border-2 p-5 transition-all hover:border-primary/50 bg-white">
-                          <div className="space-y-1 pr-4">
-                            <FormLabel className="text-base font-black text-slate-900">Kirim Anonim</FormLabel>
-                            <FormDescription className="text-xs leading-relaxed">
-                              Nama & NIM Anda akan disembunyikan dari staf. Hanya Ketua Komisi yang bisa melihat data asli Anda untuk validasi.
+                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border-2 p-4 md:p-5 transition-all hover:border-primary/50 bg-white">
+                          <div className="space-y-0.5 md:space-y-1 pr-4">
+                            <FormLabel className="text-sm md:text-base font-black text-slate-900">Kirim Anonim</FormLabel>
+                            <FormDescription className="text-[10px] md:text-xs leading-relaxed">
+                              Identitas Anda akan disembunyikan dari staf pengelola.
                             </FormDescription>
                           </div>
                           <FormControl>
                             <Switch
                               checked={field.value}
                               onCheckedChange={field.onChange}
-                              className="data-[state=checked]:bg-primary"
+                              className="data-[state=checked]:bg-primary scale-90 md:scale-100"
                             />
                           </FormControl>
                         </FormItem>

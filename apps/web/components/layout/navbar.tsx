@@ -125,19 +125,19 @@ export default function Navbar() {
               
               <div className="flex flex-col gap-6">
                 <div className="space-y-4">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Menu Utama</p>
-                  <nav className="flex flex-col gap-2">
+                  <p className="text-xs font-bold text-primary uppercase tracking-widest pl-2 border-l-2 border-primary">Menu Utama</p>
+                  <nav className="flex flex-col gap-1">
                     {navLinks.map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                        className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-semibold transition-all active:scale-[0.98] ${
                           pathname === link.href 
-                          ? 'bg-primary/10 text-primary' 
-                          : 'hover:bg-muted text-muted-foreground'
+                          ? 'bg-primary text-primary-foreground shadow-md' 
+                          : 'hover:bg-muted text-foreground/80'
                         }`}
                       >
-                        <link.icon className="w-5 h-5" />
+                        <link.icon className={`w-5 h-5 ${pathname === link.href ? 'text-primary-foreground' : 'text-primary'}`} />
                         {link.name}
                       </Link>
                     ))}
@@ -145,49 +145,49 @@ export default function Navbar() {
                 </div>
 
                 <div className="space-y-4">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Akun & Sesi</p>
+                  <p className="text-xs font-bold text-primary uppercase tracking-widest pl-2 border-l-2 border-primary">Akun & Sesi</p>
                   {isAuthenticated ? (
                     <div className="space-y-2">
-                      <div className="flex items-center gap-3 px-4 py-3 bg-secondary rounded-lg mb-4">
-                        <div className="bg-primary/10 p-2 rounded-full">
-                          <User className="w-5 h-5 text-primary" />
+                      <div className="flex items-center gap-4 px-4 py-4 bg-secondary/50 border border-border/50 rounded-xl mb-4">
+                        <div className="bg-primary p-2.5 rounded-full shadow-inner">
+                          <User className="w-5 h-5 text-primary-foreground" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-bold">{user?.name}</span>
-                          <span className="text-[10px] text-muted-foreground">{user?.nim}</span>
+                          <span className="text-sm font-bold text-foreground">{user?.name}</span>
+                          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight">{user?.nim}</span>
                         </div>
                       </div>
                       <Link
                         href="/dashboard"
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                        className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-semibold transition-all active:scale-[0.98] ${
                           pathname.startsWith('/dashboard') 
-                          ? 'bg-primary/10 text-primary' 
-                          : 'hover:bg-muted text-muted-foreground'
+                          ? 'bg-primary text-primary-foreground shadow-md' 
+                          : 'hover:bg-muted text-foreground/80'
                         }`}
                       >
-                        <LayoutDashboard className="w-5 h-5" />
+                        <LayoutDashboard className={`w-5 h-5 ${pathname.startsWith('/dashboard') ? 'text-primary-foreground' : 'text-primary'}`} />
                         Dashboard
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                        className="flex w-full items-center gap-4 px-4 py-4 rounded-xl text-base font-semibold text-destructive hover:bg-destructive/10 transition-colors active:scale-[0.98]"
                       >
                         <LogOut className="w-5 h-5" />
                         Keluar
                       </button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3">
                       <Link href="/auth/login" className="w-full">
-                        <Button variant="outline" className="w-full gap-2">
-                          <LogIn className="w-4 h-4" />
+                        <Button variant="outline" size="lg" className="w-full gap-3 font-bold h-12 rounded-xl border-2">
+                          <LogIn className="w-5 h-5 text-primary" />
                           Login
                         </Button>
                       </Link>
                       <Link href="/auth/register" className="w-full">
-                        <Button className="w-full gap-2">
-                          <UserPlus className="w-4 h-4" />
-                          Daftar
+                        <Button size="lg" className="w-full gap-3 font-bold h-12 rounded-xl shadow-lg">
+                          <UserPlus className="w-5 h-5" />
+                          Daftar Akun
                         </Button>
                       </Link>
                     </div>

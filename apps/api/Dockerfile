@@ -11,7 +11,7 @@ COPY package*.json ./
 COPY packages/shared/package*.json ./packages/shared/
 COPY apps/api/package*.json ./apps/api/
 
-# Install dependencies
+# Install dependencies (termasuk package ws yang baru ditambahkan)
 RUN npm install
 
 # Copy source code

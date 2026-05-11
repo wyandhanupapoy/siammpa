@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import axios from 'axios';
+import * as dns from 'dns';
 
 @Injectable()
 export class NotificationService {
@@ -11,7 +12,7 @@ export class NotificationService {
 
   constructor(private configService: ConfigService) {
     this.fonnteToken = this.configService.get<string>('FONNTE_TOKEN');
-    // ... (rest of SMTP config remains same)
+    
     const smtpHost = this.configService.get<string>('SMTP_HOST');
     const smtpPort = this.configService.get<number>('SMTP_PORT', 587);
 
@@ -24,8 +25,19 @@ export class NotificationService {
           user: this.configService.get<string>('SMTP_USER'),
           pass: this.configService.get<string>('SMTP_PASS'),
         },
-        tls: { rejectUnauthorized: false },
-      });
+        tls: { 
+          rejectUnauthorized: false,
+          // Explicitly tell TLS to use IPv4
+          servername: smtpHost
+        },
+        // Force IPv4 and bypass IPv6 completely using custom lookup
+        lookup: (hostname, options, callback) => {
+          dns.lookup(hostname, { family: 4 }, callback);
+        },
+        connectionTimeout: 30000, // Increased timeout
+        greetingTimeout: 30000,
+        socketTimeout: 30000,
+      } as any);
     }
   }
 

@@ -94,12 +94,27 @@
     width: 100%;
   }
 
-  /* Optimized Mobile Typography */
+  /* Optimized Mobile Typography & Spacing */
   @media (max-width: 768px) {
-    h1 { @apply text-4xl leading-[1.1]; }
-    h2 { @apply text-2xl; }
-    h3 { @apply text-xl; }
+    h1 { @apply text-3xl leading-tight font-bold tracking-tight; }
+    h2 { @apply text-xl leading-snug font-semibold; }
+    h3 { @apply text-lg leading-normal font-medium; }
     .container { @apply px-4; }
+    
+    /* Global spacing reductions for mobile */
+    .section-padding { @apply py-8; }
+    .card-padding { @apply p-4; }
+    .stack-spacing { @apply space-y-4; }
+    
+    /* Reduced button padding for mobile */
+    .btn-mobile { @apply px-3 py-1.5 text-sm; }
+  }
+
+  /* Desktop standard */
+  @media (min-width: 769px) {
+    .section-padding { @apply py-16; }
+    .card-padding { @apply p-6; }
+    .stack-spacing { @apply space-y-6; }
   }
 
   /* Custom Scrollbar */

@@ -65,77 +65,76 @@ export function PublicStats() {
   ];
 
   return (
-    <div className="space-y-6 md:space-y-10 py-6 md:py-10 px-2 md:px-0">
-      <div className="text-center space-y-2 md:space-y-3">
-        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Transparansi Kinerja</h2>
-        <p className="text-xs md:text-sm text-slate-500 font-medium px-4">Statistik real-time pengelolaan aspirasi mahasiswa oleh MPA.</p>
+    <div className="space-y-4 md:space-y-10 py-4 md:py-10 px-2 md:px-0">
+      <div className="text-center space-y-1 md:space-y-3">
+        <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">Transparansi Kinerja</h2>
+        <p className="text-[10px] md:text-sm text-slate-500 font-medium px-4">Statistik real-time pengelolaan aspirasi mahasiswa.</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
         {stats.map((stat) => (
-          <Card key={stat.name} className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-[1.5rem] md:rounded-[2rem] bg-white group overflow-hidden first:col-span-2 lg:first:col-span-1">
-            <div className={`absolute top-0 right-0 w-16 h-16 md:w-24 md:h-24 ${stat.bg} rounded-full -mr-6 -mt-6 md:-mr-8 md:-mt-8 opacity-20 group-hover:scale-150 transition-transform duration-500`}></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 relative z-10 p-4 md:p-6">
-              <CardTitle className="text-[9px] md:text-xs font-black text-slate-400 uppercase tracking-widest">{stat.name}</CardTitle>
-              <div className={`p-2 md:p-3 rounded-xl md:rounded-2xl ${stat.bg} shadow-sm group-hover:rotate-12 transition-transform`}>
-                <stat.icon className={`h-4 w-4 md:h-5 md:w-5 ${stat.color}`} />
+          <Card key={stat.name} className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl md:rounded-[2rem] bg-white group overflow-hidden first:col-span-2 lg:first:col-span-1">
+            <div className={`absolute top-0 right-0 w-12 h-12 md:w-24 md:h-24 ${stat.bg} rounded-full -mr-4 -mt-4 md:-mr-8 md:-mt-8 opacity-20 group-hover:scale-150 transition-transform duration-500`}></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 relative z-10 p-3 md:p-6">
+              <CardTitle className="text-[8px] md:text-xs font-black text-slate-400 uppercase tracking-widest">{stat.name}</CardTitle>
+              <div className={`p-1.5 md:p-3 rounded-lg md:rounded-2xl ${stat.bg} shadow-sm group-hover:rotate-12 transition-transform`}>
+                <stat.icon className={`h-3.5 w-3.5 md:h-5 md:w-5 ${stat.color}`} />
               </div>
             </CardHeader>
-            <CardContent className="relative z-10 p-4 md:p-6 pt-0 md:pt-0">
-              <div className="text-2xl md:text-4xl font-black text-slate-900">{stat.value}</div>
-              <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 md:mt-2 uppercase tracking-tight">{stat.desc}</p>
+            <CardContent className="relative z-10 p-3 md:p-6 pt-0 md:pt-0">
+              <div className="text-xl md:text-4xl font-black text-slate-900">{stat.value}</div>
+              <p className="text-[7px] md:text-[10px] font-bold text-slate-400 mt-1 md:mt-2 uppercase tracking-tight line-clamp-1">{stat.desc}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Card className="border-none shadow-lg rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white mx-1 md:mx-0">
-        <CardHeader className="bg-slate-900 border-none px-6 py-4 md:px-8 md:py-6">
-          <CardTitle className="text-sm md:text-base font-bold text-white flex items-center gap-2 md:gap-3">
-            <div className="bg-primary/20 p-1.5 md:p-2 rounded-lg md:rounded-xl">
-              <BarChart3 className="w-4 h-4 md:w-5 md:h-5 text-primary" />
+      <Card className="border-none shadow-lg rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white mx-0">
+        <CardHeader className="bg-slate-900 border-none px-4 py-3 md:px-8 md:py-6">
+          <CardTitle className="text-xs md:text-base font-bold text-white flex items-center gap-2 md:gap-3">
+            <div className="bg-primary/20 p-1 md:p-2 rounded-lg md:rounded-xl">
+              <BarChart3 className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
             </div>
             Kategori Dominan
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 md:p-8 h-[300px] md:h-[350px] w-full">
-          {isMounted && data.categories.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.categories} layout="vertical" margin={{ left: 20, right: 30, top: 10, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                <XAxis type="number" hide />
-                <YAxis 
-                  dataKey="category" 
-                  type="category" 
-                  width={140} 
-                  tick={{ fontSize: 11, fontWeight: 700, fill: '#64748b' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ 
-                    borderRadius: '16px', 
-                    border: 'none', 
-                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
-                  }}
-                />
-                <Bar 
-                  dataKey="count" 
-                  fill="oklch(0.205 0 0)" 
-                  radius={[0, 10, 10, 0]} 
-                  barSize={32}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-4">
-              <BarChart3 className="w-12 h-12 opacity-20" />
-              <p className="text-sm font-medium">Belum ada data kategori yang tersedia.</p>
-            </div>
-          )}
+        <CardContent className="p-2 md:p-8">
+          <div className="h-[180px] md:h-[300px] w-full">
+            {isMounted && data.categories.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.categories} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis 
+                    dataKey="category" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#64748b', fontSize: typeof window !== 'undefined' && window.innerWidth < 768 ? 8 : 12, fontWeight: 700 }} 
+                    interval={0}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#64748b', fontSize: typeof window !== 'undefined' && window.innerWidth < 768 ? 8 : 12, fontWeight: 700 }} 
+                  />
+                  <Tooltip 
+                    cursor={{ fill: '#f8fafc' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar 
+                    dataKey="count" 
+                    fill="oklch(0.205 0 0)" 
+                    radius={[4, 4, 0, 0]} 
+                    barSize={typeof window !== 'undefined' && window.innerWidth < 768 ? 20 : 40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-4">
+                <BarChart3 className="w-12 h-12 opacity-20" />
+                <p className="text-sm font-medium">Belum ada data kategori yang tersedia.</p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
