@@ -9,13 +9,16 @@ export function useSocket() {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const isHF = SOCKET_URL.includes('.hf.space');
+    // Clean up URL: remove /api/v1 if present to get the base server URL
+    const baseUrl = SOCKET_URL.replace(/\/api\/v1\/?$/, '');
+    const isHF = baseUrl.includes('.hf.space');
     
-    const socketIo = io(SOCKET_URL, {
+    const socketIo = io(baseUrl, {
       path: '/socket.io',
-      // HF Spaces proxy can be problematic with WebSockets
-      transports: isHF ? ['polling', 'websocket'] : ['websocket', 'polling'],
-      secure: SOCKET_URL.startsWith('https'),
+      // HF Spaces proxy doesn't support sticky sessions well, 
+      // so we use 'websocket' ONLY to bypass polling 400 errors.
+      transports: isHF ? ['websocket'] : ['websocket', 'polling'],
+      secure: baseUrl.startsWith('https'),
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,

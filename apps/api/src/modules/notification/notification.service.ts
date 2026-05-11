@@ -15,6 +15,11 @@ export class NotificationService {
     private prisma: PrismaService,
   ) {
     this.fonnteToken = this.configService.get<string>('FONNTE_TOKEN');
+    if (this.fonnteToken) {
+      this.logger.log(`Fonnte Token loaded: ${this.fonnteToken.substring(0, 4)}***`);
+    } else {
+      this.logger.warn('Fonnte Token NOT found in configuration');
+    }
     
     const smtpHost = this.configService.get<string>('SMTP_HOST');
     const smtpPort = this.configService.get<number>('SMTP_PORT', 587);
@@ -74,6 +79,7 @@ export class NotificationService {
     }
 
     this.logger.log(`Attempting to send WhatsApp to ${formattedPhone}...`);
+    this.logger.debug(`WhatsApp Payload: ${JSON.stringify({ target: formattedPhone, message: message.substring(0, 20) + '...' })}`);
 
     try {
       const response = await axios.post(

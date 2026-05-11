@@ -15,7 +15,8 @@ import { Server, Socket } from 'socket.io';
     methods: ['GET', 'POST'],
     credentials: true,
   },
-  transports: ['polling', 'websocket'], // Ensure polling-first for better compatibility with proxies
+  transports: ['websocket', 'polling'],
+  allowEIO3: true,
   pingTimeout: 60000,
   pingInterval: 25000,
 })
