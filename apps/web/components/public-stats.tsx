@@ -65,40 +65,40 @@ export function PublicStats() {
   ];
 
   return (
-    <div className="space-y-10 py-10">
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Transparansi Kinerja</h2>
-        <p className="text-slate-500 font-medium">Statistik real-time pengelolaan aspirasi mahasiswa oleh MPA HIMAKOM POLBAN.</p>
+    <div className="space-y-6 md:space-y-10 py-6 md:py-10 px-2 md:px-0">
+      <div className="text-center space-y-2 md:space-y-3">
+        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Transparansi Kinerja</h2>
+        <p className="text-xs md:text-sm text-slate-500 font-medium px-4">Statistik real-time pengelolaan aspirasi mahasiswa oleh MPA.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
         {stats.map((stat) => (
-          <Card key={stat.name} className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2rem] bg-white group overflow-hidden">
-            <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} rounded-full -mr-8 -mt-8 opacity-20 group-hover:scale-150 transition-transform duration-500`}></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.name}</CardTitle>
-              <div className={`p-3 rounded-2xl ${stat.bg} shadow-sm group-hover:rotate-12 transition-transform`}>
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
+          <Card key={stat.name} className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-[1.5rem] md:rounded-[2rem] bg-white group overflow-hidden first:col-span-2 lg:first:col-span-1">
+            <div className={`absolute top-0 right-0 w-16 h-16 md:w-24 md:h-24 ${stat.bg} rounded-full -mr-6 -mt-6 md:-mr-8 md:-mt-8 opacity-20 group-hover:scale-150 transition-transform duration-500`}></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 relative z-10 p-4 md:p-6">
+              <CardTitle className="text-[9px] md:text-xs font-black text-slate-400 uppercase tracking-widest">{stat.name}</CardTitle>
+              <div className={`p-2 md:p-3 rounded-xl md:rounded-2xl ${stat.bg} shadow-sm group-hover:rotate-12 transition-transform`}>
+                <stat.icon className={`h-4 w-4 md:h-5 md:w-5 ${stat.color}`} />
               </div>
             </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-4xl font-black text-slate-900">{stat.value}</div>
-              <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-tight">{stat.desc}</p>
+            <CardContent className="relative z-10 p-4 md:p-6 pt-0 md:pt-0">
+              <div className="text-2xl md:text-4xl font-black text-slate-900">{stat.value}</div>
+              <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 md:mt-2 uppercase tracking-tight">{stat.desc}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Card className="border-none shadow-lg rounded-[2.5rem] overflow-hidden bg-white">
-        <CardHeader className="bg-slate-900 border-none px-8 py-6">
-          <CardTitle className="text-base font-bold text-white flex items-center gap-3">
-            <div className="bg-primary/20 p-2 rounded-xl">
-              <BarChart3 className="w-5 h-5 text-primary" />
+      <Card className="border-none shadow-lg rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white mx-1 md:mx-0">
+        <CardHeader className="bg-slate-900 border-none px-6 py-4 md:px-8 md:py-6">
+          <CardTitle className="text-sm md:text-base font-bold text-white flex items-center gap-2 md:gap-3">
+            <div className="bg-primary/20 p-1.5 md:p-2 rounded-lg md:rounded-xl">
+              <BarChart3 className="w-4 h-4 md:w-5 md:h-5 text-primary" />
             </div>
-            Kategori Aspirasi Dominan
+            Kategori Dominan
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-8 h-[350px] w-full">
+        <CardContent className="p-4 md:p-8 h-[300px] md:h-[350px] w-full">
           {isMounted && data.categories.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.categories} layout="vertical" margin={{ left: 20, right: 30, top: 10, bottom: 10 }}>

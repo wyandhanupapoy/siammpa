@@ -176,39 +176,39 @@ export default function CreateAspirationPage() {
     <ProtectedRoute>
       <div className="max-w-2xl mx-auto py-4 md:py-8 px-4">
         {/* Stepper UI - Mobile Friendly */}
-        <div className="mb-8 flex justify-between items-center relative max-w-md mx-auto">
+        <div className="mb-6 md:mb-8 flex justify-between items-center relative max-w-md mx-auto px-2">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex flex-col items-center z-10">
               <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                 step === s ? 'border-primary bg-primary text-white scale-110 shadow-lg' : 
                 step > s ? 'border-primary bg-primary/20 text-primary' : 'border-muted text-muted-foreground bg-white'
               }`}>
-                {step > s ? <Check className="w-5 h-5 md:w-6 md:h-6" /> : <span className="text-xs md:text-sm font-bold">{s}</span>}
+                {step > s ? <Check className="w-4 h-4 md:w-6 md:h-6" /> : <span className="text-xs md:text-sm font-bold">{s}</span>}
               </div>
-              <span className={`text-[10px] md:text-xs mt-2 font-bold uppercase tracking-tight ${
+              <span className={`text-[9px] md:text-xs mt-1.5 font-black uppercase tracking-tighter md:tracking-tight ${
                 step === s ? 'text-primary' : 'text-muted-foreground'
               }`}>
-                {s === 1 ? 'Privasi' : s === 2 ? 'Detail' : 'Review'}
+                {s === 1 ? 'Privasi' : s === 2 ? 'Isi' : 'Kirim'}
               </span>
             </div>
           ))}
-          <div className="absolute top-4 md:top-5 left-0 w-full h-[1px] md:h-[2px] bg-slate-200 -z-0"></div>
+          <div className="absolute top-4 md:top-5 left-0 w-full h-[1px] md:h-[2px] bg-slate-100 -z-0"></div>
         </div>
 
-        <Card className="border-none shadow-xl md:shadow-2xl md:border bg-white/50 backdrop-blur-sm">
-          <CardHeader className="space-y-1 pb-4 md:pb-6">
-            <CardTitle className="text-xl md:text-2xl font-black text-slate-900">
+        <Card className="border-none shadow-xl md:shadow-2xl md:border bg-white/80 backdrop-blur-md rounded-[2rem]">
+          <CardHeader className="space-y-1 p-6 md:p-8 pb-2 md:pb-4">
+            <CardTitle className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
               {step === 1 && 'Pengaturan Privasi'}
               {step === 2 && 'Sampaikan Aspirasi'}
               {step === 3 && 'Tinjau Laporan'}
             </CardTitle>
-            <CardDescription className="text-sm">
-              {step === 1 && 'Konfirmasi identitas dan pilih opsi anonimitas.'}
-              {step === 2 && 'Jelaskan aspirasi atau keluhan Anda secara detail.'}
+            <CardDescription className="text-xs md:text-sm font-medium">
+              {step === 1 && 'Pilih bagaimana identitas Anda ditampilkan.'}
+              {step === 2 && 'Jelaskan aspirasi Anda secara detail.'}
               {step === 3 && 'Pastikan data sudah benar sebelum dikirim.'}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6 md:p-8 pt-4">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {step === 1 && (

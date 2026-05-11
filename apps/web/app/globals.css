@@ -89,6 +89,17 @@
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/10 selection:text-primary;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Optimized Mobile Typography */
+  @media (max-width: 768px) {
+    h1 { @apply text-4xl leading-[1.1]; }
+    h2 { @apply text-2xl; }
+    h3 { @apply text-xl; }
+    .container { @apply px-4; }
   }
 
   /* Custom Scrollbar */
