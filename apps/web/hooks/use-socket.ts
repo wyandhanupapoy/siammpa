@@ -9,12 +9,17 @@ export function useSocket() {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
+    const isHF = SOCKET_URL.includes('.hf.space');
+    
     const socketIo = io(SOCKET_URL, {
       path: '/socket.io',
-      transports: ['polling', 'websocket'], // Try polling first for stability
+      // HF Spaces proxy can be problematic with WebSockets
+      transports: isHF ? ['polling', 'websocket'] : ['websocket', 'polling'],
       secure: SOCKET_URL.startsWith('https'),
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      timeout: 20000,
     });
 
     socketIo.on('connect', () => {
