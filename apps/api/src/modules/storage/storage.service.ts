@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import * as ws from 'ws';
 
 @Injectable()
 export class StorageService {
@@ -16,7 +17,14 @@ export class StorageService {
     const key = this.configService.get<string>('SUPABASE_KEY');
 
     if (url && key) {
-      this.supabase = createClient(url, key);
+      this.supabase = createClient(url, key, {
+        auth: {
+          persistSession: false,
+        },
+        realtime: {
+          transport: ws,
+        },
+      });
     }
   }
 
