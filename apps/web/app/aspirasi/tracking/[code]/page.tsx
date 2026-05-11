@@ -8,7 +8,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Clock, Info, MessageSquareHeart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { Clock, Info, MessageSquareHeart, Copy } from 'lucide-react';
 import SurveyForm from '@/components/forms/survey-form';
 
 const statusColors: Record<string, string> = {
@@ -60,8 +62,21 @@ export default function TrackingDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{aspiration.aspirationCode}</h1>
+      <div className="flex justify-between items-center bg-white p-4 rounded-xl border shadow-sm">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl md:text-3xl font-bold font-mono tracking-tight">{aspiration.aspirationCode}</h1>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-slate-500 hover:text-primary"
+            onClick={() => {
+              navigator.clipboard.writeText(aspiration.aspirationCode);
+              toast.success('Kode aspirasi disalin ke clipboard!');
+            }}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
         <Badge className={statusColors[aspiration.status] || ''}>
           {aspiration.status}
         </Badge>

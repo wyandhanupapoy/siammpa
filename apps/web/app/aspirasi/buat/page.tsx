@@ -223,16 +223,11 @@ export default function CreateAspirationPage() {
                         <UserCheck className="w-5 h-5 md:w-6 md:h-6 text-white" />
                       </div>
                       <div className="space-y-0.5 md:space-y-1">
-                        <p className="text-sm md:text-base font-black tracking-tight">{user?.name}</p>
-                        <p className="text-[10px] md:text-xs text-slate-300 font-medium">{user?.nim} • {user?.email}</p>
-                        <div className="flex items-center gap-1.5 mt-1.5 md:mt-2 bg-white/10 w-fit px-2 py-0.5 rounded-md">
-                          <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                          <p className="text-[8px] md:text-[10px] font-bold uppercase">Terverifikasi</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <FormField
+                          <p className="text-sm md:text-base font-black tracking-tight text-white">{user?.name}</p>
+                          <p className="text-[10px] md:text-xs text-slate-300 font-medium">{user?.nim} • {user?.email}</p>
+                          <div className="flex items-center gap-1.5 mt-1.5 md:mt-2 bg-white/10 w-fit px-2 py-0.5 rounded-md">
+                            <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                            <p className="text-[8px] md:text-[10px] font-bold uppercase text-white">Terverifikasi</p>
                       control={form.control}
                       name="isAnonymous"
                       render={({ field }) => (
