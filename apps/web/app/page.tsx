@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Search, ShieldCheck, FileQuestion, ArrowRight, Zap, CheckCircle2, Phone, Mail, AtSign, HelpCircle, ChevronDown, TrendingUp } from 'lucide-react';
+import { MessageSquare, Search, ShieldCheck, FileQuestion, ArrowRight, Zap, CheckCircle2, Phone, Mail, AtSign, HelpCircle, ChevronDown, TrendingUp, User } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
