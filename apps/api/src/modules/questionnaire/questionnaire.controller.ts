@@ -41,10 +41,16 @@ export class QuestionnaireController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KETUA_MPA')
   @Post('requests/:id/approve')
   async approveRequest(@Param('id') id: string, @Request() req) {
-    return this.questionnaireService.approveRequest(id, req.user.id);
+    const approverRoles =
+      req.user.roles?.map((userRole: any) => userRole.role?.name).filter(Boolean) || [];
+    return this.questionnaireService.approveRequest(
+      id,
+      req.user.id,
+      approverRoles,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

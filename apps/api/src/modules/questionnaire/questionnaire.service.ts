@@ -33,10 +33,11 @@ export class QuestionnaireService {
     });
   }
 
-  async approveRequest(id: string, picId: string) {
+  async approveRequest(id: string, picId: string, approverRoles: string[] = []) {
     // SOP 3.4: Maksimum 2 kuesioner mendadak (KSR-C) per bulan
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const canOverrideMonthlyLimit = approverRoles.includes('KETUA_MPA');
     
     const monthlyCount = await this.prisma.questionnaire.count({
       where: {
@@ -45,13 +46,27 @@ export class QuestionnaireService {
       },
     });
 
-    if (monthlyCount >= 2) {
+    if (monthlyCount >= 2 && !canOverrideMonthlyLimit) {
       throw new BadRequestException(
         'Batas maksimum kuesioner mendadak (2 per bulan) telah tercapai. Butuh persetujuan Ketua MPA.',
       );
     }
 
     return this.prisma.$transaction(async (tx) => {
+      const existingRequest = await tx.questionnaireRequest.findUnique({
+        where: { id },
+      });
+
+      if (!existingRequest) {
+        throw new BadRequestException('Permintaan kuesioner tidak ditemukan.');
+      }
+
+      if (existingRequest.status !== RequestStatus.PENDING) {
+        throw new BadRequestException(
+          'Hanya permintaan berstatus PENDING yang dapat disetujui.',
+        );
+      }
+
       const request = await tx.questionnaireRequest.update({
         where: { id },
         data: { status: RequestStatus.APPROVED },
