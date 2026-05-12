@@ -7,6 +7,14 @@ export class QuestionnaireImportService {
   constructor(private prisma: PrismaService) {}
 
   async importFromCsv(questionnaireId: string, fileBuffer: Buffer) {
+    const questionnaire = await this.prisma.questionnaire.findUnique({
+      where: { id: questionnaireId },
+    });
+
+    if (!questionnaire) {
+      throw new BadRequestException('Questionnaire not found');
+    }
+
     const records = parse(fileBuffer, {
       columns: true,
       skip_empty_lines: true,
@@ -42,12 +50,20 @@ export class QuestionnaireImportService {
           respondentName = value as string;
       });
 
-      responses.push({
-        questionnaireId,
-        respondentNim,
-        respondentName,
-        answers,
-      });
+      if (Object.keys(answers).length > 0) {
+        responses.push({
+          questionnaireId,
+          respondentNim,
+          respondentName,
+          answers,
+        });
+      }
+    }
+
+    if (responses.length === 0) {
+      throw new BadRequestException(
+        'CSV tidak memiliki kolom jawaban yang dapat diimpor.',
+      );
     }
 
     // Save to database

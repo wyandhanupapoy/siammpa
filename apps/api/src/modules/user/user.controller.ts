@@ -30,7 +30,7 @@ export class UserController {
   async getProfile(@Request() req) {
     const user = await this.userService.findOne({ id: req.user.id });
     if (!user) throw new NotFoundException('User not found');
-    
+
     // Remove sensitive data
     const { passwordHash, ...rest } = user as any;
     return rest;
@@ -149,80 +149,89 @@ export class UserController {
 
     if (!user) throw new NotFoundException('User not found');
 
-    return this.prisma.$transaction(async (tx) => {
-      // Get all aspiration IDs for this user
-      const aspirations = await tx.aspiration.findMany({
-        where: { userId: id },
-        select: { id: true },
-      });
-      const aspIds = aspirations.map((a) => a.id);
+    return this.prisma.$transaction(
+      async (tx) => {
+        // Get all aspiration IDs for this user
+        const aspirations = await tx.aspiration.findMany({
+          where: { userId: id },
+          select: { id: true },
+        });
+        const aspIds = aspirations.map((a) => a.id);
 
-      // 1. Questionnaire PIC assignments
-      await tx.questionnaire.updateMany({
-        where: { picId: id },
-        data: { picId: null },
-      });
-
-      // 2. Aspiration sub-records
-      if (aspIds.length > 0) {
-        await tx.statusLog.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.attachment.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.validationForm.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.classificationForm.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.disposition.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.hearing.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.monitoringLog.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.satisfactionSurvey.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.escalation.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.internalComment.deleteMany({
-          where: { aspirationId: { in: aspIds } },
-        });
-        await tx.internalAnalysis.deleteMany({
-          where: { aspirationId: { in: aspIds } },
+        // 1. Questionnaire PIC assignments
+        await tx.questionnaire.updateMany({
+          where: { picId: id },
+          data: { picId: null },
         });
 
-        // Final delete for aspirations
-        await tx.aspiration.deleteMany({ where: { id: { in: aspIds } } });
-      }
+        // 2. Aspiration sub-records
+        if (aspIds.length > 0) {
+          await tx.statusLog.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.attachment.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.validationForm.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.classificationForm.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.disposition.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.hearing.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.monitoringLog.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.satisfactionSurvey.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.escalation.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.internalComment.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
+          await tx.internalAnalysis.deleteMany({
+            where: { aspirationId: { in: aspIds } },
+          });
 
-      // 3. User sub-records not linked to specific aspirations
-      await tx.statusLog.deleteMany({ where: { changedById: id } });
-      await tx.internalComment.deleteMany({ where: { userId: id } });
-      await tx.notification.deleteMany({ where: { userId: id } });
-      await tx.auditLog.deleteMany({ where: { userId: id } });
-      await tx.userRole.deleteMany({ where: { userId: id } });
-      await tx.newsReaction.deleteMany({ where: { userId: id } });
-      await tx.newsComment.deleteMany({ where: { userId: id } });
+          // Final delete for aspirations
+          await tx.aspiration.deleteMany({ where: { id: { in: aspIds } } });
+        }
 
-      const newsIds = await tx.news.findMany({ where: { authorId: id } }).then(n => n.map(x => x.id));
-      if (newsIds.length > 0) {
-        await tx.newsReaction.deleteMany({ where: { newsId: { in: newsIds } } });
-        await tx.newsComment.deleteMany({ where: { newsId: { in: newsIds } } });
-        await tx.news.deleteMany({ where: { authorId: id } });
-      }
+        // 3. User sub-records not linked to specific aspirations
+        await tx.statusLog.deleteMany({ where: { changedById: id } });
+        await tx.internalComment.deleteMany({ where: { userId: id } });
+        await tx.notification.deleteMany({ where: { userId: id } });
+        await tx.auditLog.deleteMany({ where: { userId: id } });
+        await tx.userRole.deleteMany({ where: { userId: id } });
+        await tx.newsReaction.deleteMany({ where: { userId: id } });
+        await tx.newsComment.deleteMany({ where: { userId: id } });
 
-      // 4. Finally delete the user
-      return tx.user.delete({ where: { id } });
-    }, {
-      timeout: 45000, // Tambahan timeout untuk query yang berat
-    });
+        const newsIds = await tx.news
+          .findMany({ where: { authorId: id } })
+          .then((n) => n.map((x) => x.id));
+        if (newsIds.length > 0) {
+          await tx.newsReaction.deleteMany({
+            where: { newsId: { in: newsIds } },
+          });
+          await tx.newsComment.deleteMany({
+            where: { newsId: { in: newsIds } },
+          });
+          await tx.news.deleteMany({ where: { authorId: id } });
+        }
+
+        // 4. Finally delete the user
+        return tx.user.delete({ where: { id } });
+      },
+      {
+        timeout: 45000, // Tambahan timeout untuk query yang berat
+      },
+    );
   }
 }

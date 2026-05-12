@@ -15,17 +15,23 @@ export class NotificationService {
   ) {
     this.fonnteToken = this.configService.get<string>('FONNTE_TOKEN');
     if (this.fonnteToken) {
-      this.logger.log(`Fonnte Token loaded: ${this.fonnteToken.substring(0, 4)}***`);
+      this.logger.log(
+        `Fonnte Token loaded: ${this.fonnteToken.substring(0, 4)}***`,
+      );
     } else {
       this.logger.warn('Fonnte Token NOT found in configuration');
     }
-    
+
     this.brevoApiKey = this.configService.get<string>('BREVO_API_KEY');
 
     if (this.brevoApiKey) {
-      this.logger.log('Brevo REST API initialized for email delivery (bypassing strict SMTP limitations).');
+      this.logger.log(
+        'Brevo REST API initialized for email delivery (bypassing strict SMTP limitations).',
+      );
     } else {
-      this.logger.warn('BREVO_API_KEY not found. Email notifications will be skipped or mocked.');
+      this.logger.warn(
+        'BREVO_API_KEY not found. Email notifications will be skipped or mocked.',
+      );
     }
   }
 
@@ -55,7 +61,9 @@ export class NotificationService {
     }
 
     this.logger.log(`Attempting to send WhatsApp to ${formattedPhone}...`);
-    this.logger.debug(`WhatsApp Payload: ${JSON.stringify({ target: formattedPhone, message: message.substring(0, 20) + '...' })}`);
+    this.logger.debug(
+      `WhatsApp Payload: ${JSON.stringify({ target: formattedPhone, message: message.substring(0, 20) + '...' })}`,
+    );
 
     try {
       const response = await axios.post(
@@ -100,7 +108,8 @@ export class NotificationService {
     }
 
     try {
-      const fromEmail = this.configService.get<string>('SMTP_FROM') || 'noreply@siammpa.com';
+      const fromEmail =
+        this.configService.get<string>('SMTP_FROM') || 'noreply@siammpa.com';
       const fromName = 'SIAM MPA HIMAKOM';
 
       const response = await axios.post(
@@ -116,10 +125,12 @@ export class NotificationService {
             'api-key': this.brevoApiKey,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
-      this.logger.log(`Email sent successfully via Brevo to ${to} (MessageId: ${response.data?.messageId})`);
+      this.logger.log(
+        `Email sent successfully via Brevo to ${to} (MessageId: ${response.data?.messageId})`,
+      );
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || error.message;
       this.logger.error(`Failed to send email to ${to} via Brevo: ${errorMsg}`);
@@ -140,8 +151,7 @@ export class NotificationService {
 
     // 2. Kirim WhatsApp (Fail-Safe)
     if (phone) {
-      const waMessage = 
-`🔔 *UPDATE ASPIRASI SIAM MPA*
+      const waMessage = `🔔 *UPDATE ASPIRASI SIAM MPA*
 
 Halo, aspirasi Anda dengan kode *${code}* telah diperbarui.
 
@@ -168,14 +178,13 @@ _Pesan ini dikirim otomatis oleh Sistem Informasi Aspirasi Mahasiswa MPA HIMAKOM
 
   async notifySatisfactionSurvey(email: string, code: string, phone?: string) {
     const surveyUrl = `${this.configService.get('FRONTEND_URL')}/kuesioner/survei/${code}`;
-    
+
     // 1. Kirim Email
     // ... (existing email logic)
 
     // 2. Kirim WhatsApp
     if (phone) {
-      const waMessage = 
-`✅ *ASPIRASI SELESAI*
+      const waMessage = `✅ *ASPIRASI SELESAI*
 
 Aspirasi Anda (*${code}*) telah dinyatakan *SELESAI*.
 
@@ -231,4 +240,3 @@ Terima kasih atas partisipasi Anda!
     });
   }
 }
-

@@ -65,10 +65,13 @@ export class NewsController {
       _count: true,
     });
 
-    return reactions.reduce((acc: any, curr) => {
-      acc[curr.type] = curr._count;
-      return acc;
-    }, { LIKE: 0, DISLIKE: 0 });
+    return reactions.reduce(
+      (acc: any, curr) => {
+        acc[curr.type] = curr._count;
+        return acc;
+      },
+      { LIKE: 0, DISLIKE: 0 },
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -79,7 +82,7 @@ export class NewsController {
     @Request() req,
   ) {
     const userId = req.user.id;
-    
+
     // Check if reaction exists
     const existing = await this.prisma.newsReaction.findUnique({
       where: { newsId_userId: { newsId: id, userId } },
@@ -130,25 +133,24 @@ export class NewsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('comments/:commentId')
-  async removeComment(
-    @Param('commentId') commentId: string,
-    @Request() req,
-  ) {
+  async removeComment(@Param('commentId') commentId: string, @Request() req) {
     const comment = await this.prisma.newsComment.findUnique({
       where: { id: commentId },
     });
 
     if (!comment) throw new BadRequestException('Komentar tidak ditemukan');
-    
+
     // Only author or admin can delete
     const user = await this.prisma.user.findUnique({
       where: { id: req.user.id },
       include: { roles: { include: { role: true } } },
     });
-    const isAdmin = user?.roles.some(r => r.role.name === 'ADMIN');
+    const isAdmin = user?.roles.some((r) => r.role.name === 'ADMIN');
 
     if (comment.userId !== req.user.id && !isAdmin) {
-      throw new BadRequestException('Tidak memiliki akses untuk menghapus komentar ini');
+      throw new BadRequestException(
+        'Tidak memiliki akses untuk menghapus komentar ini',
+      );
     }
 
     return this.prisma.newsComment.delete({ where: { id: commentId } });

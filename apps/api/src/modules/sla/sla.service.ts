@@ -57,10 +57,7 @@ export class SlaService {
       const diffHours = diffMs / (1000 * 60 * 60);
 
       // SOP-09: Auto-close RESOLVED after 7 days (168 hours)
-      if (
-        aspiration.status === AspirationStatus.RESOLVED &&
-        diffHours > 168
-      ) {
+      if (aspiration.status === AspirationStatus.RESOLVED && diffHours > 168) {
         await this.workflow.transitionStatus(
           aspiration.id,
           AspirationStatus.CLOSED,

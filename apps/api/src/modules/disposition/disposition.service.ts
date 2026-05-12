@@ -67,15 +67,25 @@ export class DispositionService {
 
     // Header
     doc.fontSize(14).text('MAJELIS PERWAKILAN ANGGOTA', { align: 'center' });
-    doc.font('Helvetica-Bold').fontSize(16).text('HIMAKOM POLBAN', { align: 'center' });
-    doc.font('Helvetica').fontSize(10).text('KOMISI ASPIRASI - SURAT DISPOSISI DIGITAL', { align: 'center' });
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(16)
+      .text('HIMAKOM POLBAN', { align: 'center' });
+    doc
+      .font('Helvetica')
+      .fontSize(10)
+      .text('KOMISI ASPIRASI - SURAT DISPOSISI DIGITAL', { align: 'center' });
     doc.moveDown();
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     doc.moveDown();
 
     // Body
-    doc.fontSize(12).text(`Kode Aspirasi: ${disposition.aspiration.aspirationCode}`);
-    doc.text(`Tanggal Disposisi: ${disposition.createdAt.toLocaleDateString()}`);
+    doc
+      .fontSize(12)
+      .text(`Kode Aspirasi: ${disposition.aspiration.aspirationCode}`);
+    doc.text(
+      `Tanggal Disposisi: ${disposition.createdAt.toLocaleDateString()}`,
+    );
     doc.text(`Ditujukan Ke: ${disposition.sentTo}`);
     doc.text(`Batas Waktu: ${disposition.deadline.toLocaleDateString()}`);
     doc.moveDown();
@@ -89,7 +99,13 @@ export class DispositionService {
     doc.moveDown(2);
 
     // Footer/Signature Area
-    doc.font('Helvetica-Oblique').fontSize(10).text('Dicetak otomatis oleh Sistem Informasi Aspirasi Mahasiswa (SIAM)', { align: 'center' });
+    doc
+      .font('Helvetica-Oblique')
+      .fontSize(10)
+      .text(
+        'Dicetak otomatis oleh Sistem Informasi Aspirasi Mahasiswa (SIAM)',
+        { align: 'center' },
+      );
 
     doc.end();
   }

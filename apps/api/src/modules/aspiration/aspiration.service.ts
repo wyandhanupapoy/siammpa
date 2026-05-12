@@ -77,8 +77,7 @@ export class AspirationService {
     });
 
     if (user.phone) {
-      const waMessage = 
-`✅ *ASPIRASI BERHASIL DIKIRIM*
+      const waMessage = `✅ *ASPIRASI BERHASIL DIKIRIM*
 
 Halo ${user.name}, aspirasi Anda dengan judul *"${createAspirationDto.title}"* telah masuk ke sistem kami.
 
@@ -89,7 +88,7 @@ Pantau perkembangannya melalui:
 ${this.configService.get('FRONTEND_URL')}/aspirasi/tracking/${aspirationCode}
 
 _Pesan otomatis SIAM MPA HIMAKOM POLBAN._`;
-      
+
       this.notificationService.sendWhatsApp(user.phone, waMessage);
     }
 
@@ -144,7 +143,11 @@ _Pesan otomatis SIAM MPA HIMAKOM POLBAN._`;
     });
   }
 
-  async addMonitoringLog(aspirationId: string, userId: string, content: string) {
+  async addMonitoringLog(
+    aspirationId: string,
+    userId: string,
+    content: string,
+  ) {
     return this.prisma.monitoringLog.create({
       data: {
         aspirationId,
@@ -283,7 +286,11 @@ _Pesan otomatis SIAM MPA HIMAKOM POLBAN._`;
     });
   }
 
-  async auditIdentityReveal(aspirationId: string, userId: string, code: string) {
+  async auditIdentityReveal(
+    aspirationId: string,
+    userId: string,
+    code: string,
+  ) {
     return this.audit.log({
       userId,
       action: 'IDENTITY_REVEAL',

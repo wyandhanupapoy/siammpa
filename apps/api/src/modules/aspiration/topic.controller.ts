@@ -47,7 +47,10 @@ export class TopicController {
   }
 
   @Post(':id/assign')
-  async assign(@Param('id') id: string, @Body('aspirationIds') aspirationIds: string[]) {
+  async assign(
+    @Param('id') id: string,
+    @Body('aspirationIds') aspirationIds: string[],
+  ) {
     return this.topicService.assignAspirations(id, aspirationIds);
   }
 

@@ -29,7 +29,10 @@ export class AspirationController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createAspirationDto: CreateAspirationDto, @Request() req) {
+  async create(
+    @Body() createAspirationDto: CreateAspirationDto,
+    @Request() req,
+  ) {
     return this.aspirationService.create(createAspirationDto, req.user.id);
   }
 
@@ -103,7 +106,12 @@ export class AspirationController {
     @Body('note') note: string,
     @Request() req,
   ) {
-    return this.workflowService.transitionStatus(id, toStatus, req.user.id, note);
+    return this.workflowService.transitionStatus(
+      id,
+      toStatus,
+      req.user.id,
+      note,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

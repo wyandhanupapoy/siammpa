@@ -15,7 +15,12 @@ import { EncryptionService } from '../auth/encryption.service';
 
 @Module({
   imports: [WorkflowModule, AuthModule, StorageModule, PrismaModule],
-  providers: [AspirationService, TopicService, ReportService, EncryptionService],
+  providers: [
+    AspirationService,
+    TopicService,
+    ReportService,
+    EncryptionService,
+  ],
   controllers: [
     AspirationController,
     MonitoringController,

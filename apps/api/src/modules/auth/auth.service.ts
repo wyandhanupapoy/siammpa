@@ -63,11 +63,13 @@ export class AuthService {
       });
 
       // Send email in background (don't await)
-      this.notificationService.sendEmail(
-        data.email,
-        '[SIAM MPA] Kode Verifikasi Registrasi',
-        `Halo ${data.name},<br/><br/>Kode verifikasi Anda adalah: <strong>${verificationCode}</strong><br/><br/>Silakan masukkan kode ini untuk mengaktifkan akun Anda. Kode ini berlaku selama 24 jam.`,
-      ).catch(err => console.error('Background Email Error:', err));
+      this.notificationService
+        .sendEmail(
+          data.email,
+          '[SIAM MPA] Kode Verifikasi Registrasi',
+          `Halo ${data.name},<br/><br/>Kode verifikasi Anda adalah: <strong>${verificationCode}</strong><br/><br/>Silakan masukkan kode ini untuk mengaktifkan akun Anda. Kode ini berlaku selama 24 jam.`,
+        )
+        .catch((err) => console.error('Background Email Error:', err));
 
       return {
         message: 'Registrasi berhasil, silakan cek email untuk kode verifikasi',
@@ -153,11 +155,13 @@ export class AuthService {
     });
 
     // Send email in background
-    this.notificationService.sendEmail(
-      email,
-      '[SIAM MPA] Kode Verifikasi Baru',
-      `Halo ${pendingUser.name},<br/><br/>Kode verifikasi baru Anda adalah: <strong>${verificationCode}</strong><br/><br/>Silakan masukkan kode ini untuk mengaktifkan akun Anda.`,
-    ).catch(err => console.error('Background Resend Email Error:', err));
+    this.notificationService
+      .sendEmail(
+        email,
+        '[SIAM MPA] Kode Verifikasi Baru',
+        `Halo ${pendingUser.name},<br/><br/>Kode verifikasi baru Anda adalah: <strong>${verificationCode}</strong><br/><br/>Silakan masukkan kode ini untuk mengaktifkan akun Anda.`,
+      )
+      .catch((err) => console.error('Background Resend Email Error:', err));
 
     return { message: 'Kode verifikasi baru telah dikirim' };
   }

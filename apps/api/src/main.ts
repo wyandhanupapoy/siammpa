@@ -21,7 +21,9 @@ async function bootstrap() {
   // Swagger Documentation
   const config = new DocumentBuilder()
     .setTitle('SIAM MPA API')
-    .setDescription('API Documentation for Sistem Informasi Aspirasi Mahasiswa MPA HIMAKOM POLBAN')
+    .setDescription(
+      'API Documentation for Sistem Informasi Aspirasi Mahasiswa MPA HIMAKOM POLBAN',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();

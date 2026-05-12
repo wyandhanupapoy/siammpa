@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { useAuthStore } from '@/stores/auth-store';
 
 const formSchema = z.object({
   requesterName: z.string().min(1, 'Nama pemohon wajib diisi'),
@@ -30,6 +31,23 @@ const formSchema = z.object({
   targetRespondent: z.string().min(1, 'Target responden wajib diisi'),
   estimatedCount: z.string().optional(),
   requestedDeadline: z.string().min(1, 'Batas waktu wajib diisi'),
+}).superRefine((values, ctx) => {
+  if (values.estimatedCount && Number(values.estimatedCount) <= 0) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['estimatedCount'],
+      message: 'Estimasi responden harus lebih besar dari 0',
+    });
+  }
+
+  const deadline = new Date(values.requestedDeadline);
+  if (Number.isNaN(deadline.getTime()) || deadline <= new Date()) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['requestedDeadline'],
+      message: 'Batas waktu harus lebih besar dari hari ini',
+    });
+  }
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -37,6 +55,12 @@ type FormValues = z.infer<typeof formSchema>;
 export default function RequestQuestionnairePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuthStore();
+  const minDate = useMemo(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -51,6 +75,20 @@ export default function RequestQuestionnairePage() {
     },
   });
 
+  useEffect(() => {
+    if (!user) return;
+
+    form.reset({
+      requesterName: user.name || '',
+      requesterRole: form.getValues('requesterRole'),
+      contactInfo: user.email || '',
+      purpose: form.getValues('purpose'),
+      targetRespondent: form.getValues('targetRespondent'),
+      estimatedCount: form.getValues('estimatedCount'),
+      requestedDeadline: form.getValues('requestedDeadline'),
+    });
+  }, [form, user]);
+
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
     try {
@@ -60,7 +98,16 @@ export default function RequestQuestionnairePage() {
       };
       await api.post('/questionnaires/request', payload);
       toast.success('Permintaan kuesioner berhasil dikirim!');
-      router.push('/');
+      form.reset({
+        requesterName: user?.name || '',
+        requesterRole: '',
+        contactInfo: user?.email || '',
+        purpose: '',
+        targetRespondent: '',
+        estimatedCount: '',
+        requestedDeadline: '',
+      });
+      router.push('/dashboard/kuesioner');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Gagal mengirim permintaan.');
     } finally {
@@ -163,13 +210,32 @@ export default function RequestQuestionnairePage() {
                       <FormItem>
                         <FormLabel>Batas Waktu</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="date" min={minDate} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="estimatedCount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estimasi Jumlah Responden</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="1"
+                          placeholder="Contoh: 150"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   <Send className="w-4 h-4 mr-2" />

@@ -34,7 +34,7 @@ export class QuestionnaireController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI', 'KETUA_MPA')
   @Get('requests')
   async findAllRequests() {
     return this.questionnaireService.findAllRequests();
@@ -45,7 +45,9 @@ export class QuestionnaireController {
   @Post('requests/:id/approve')
   async approveRequest(@Param('id') id: string, @Request() req) {
     const approverRoles =
-      req.user.roles?.map((userRole: any) => userRole.role?.name).filter(Boolean) || [];
+      req.user.roles
+        ?.map((userRole: any) => userRole.role?.name)
+        .filter(Boolean) || [];
     return this.questionnaireService.approveRequest(
       id,
       req.user.id,
@@ -54,35 +56,40 @@ export class QuestionnaireController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KETUA_MPA')
   @Post('requests/:id/reject')
   async rejectRequest(@Param('id') id: string, @Body('reason') reason: string) {
     return this.questionnaireService.rejectRequest(id, reason);
   }
 
+  @Get('public/:code')
+  async findPublicByCode(@Param('code') code: string) {
+    return this.questionnaireService.findPublicByCode(code);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI', 'KETUA_MPA')
   @Get()
   async findAll() {
     return this.questionnaireService.findAll();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI', 'KETUA_MPA')
   @Put(':id')
   async update(@Param('id') id: string, @Body() data: any) {
     return this.questionnaireService.update(id, data);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI', 'KETUA_MPA')
   @Post(':id/submit-review')
   async submitForReview(@Param('id') id: string) {
     return this.questionnaireService.submitForReview(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KETUA_MPA')
   @Post(':id/publish')
   async publish(@Param('id') id: string) {
     return this.questionnaireService.publish(id);
@@ -94,28 +101,28 @@ export class QuestionnaireController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI', 'KETUA_MPA')
   @Put(':id/link')
   async updateLink(@Param('id') id: string, @Body('formUrl') formUrl: string) {
     return this.questionnaireService.update(id, { formUrl });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI', 'KETUA_MPA')
   @Get(':id/results')
   async getResults(@Param('id') id: string) {
     return this.analysisService.getResults(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI', 'KETUA_MPA')
   @Post(':id/analysis')
   async createAnalysis(@Param('id') id: string, @Body() data: any) {
     return this.analysisService.saveAnalysis(id, data);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI')
+  @Roles('ADMIN', 'KETUA_KOMISI', 'KOMISI_ASPIRASI', 'KETUA_MPA')
   @Post(':id/import')
   @UseInterceptors(FileInterceptor('file'))
   async importCsv(

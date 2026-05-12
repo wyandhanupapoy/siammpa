@@ -21,7 +21,8 @@ const criteria = [
 ];
 
 export default function SatisfactionSurveyPage() {
-  const { code } = useParams();
+  const params = useParams();
+  const code = Array.isArray(params.code) ? params.code[0] : params.code;
   const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [comment, setComment] = useState('');
@@ -30,9 +31,10 @@ export default function SatisfactionSurveyPage() {
   const { data: questionnaire, isLoading } = useQuery({
     queryKey: ['survey-ksre', code],
     queryFn: async () => {
-      const response = await api.get('/questionnaires');
-      return response.data.find((q: any) => q.code === `KSR-E-${code}`);
+      const response = await api.get(`/questionnaires/public/${code}`);
+      return response.data;
     },
+    enabled: Boolean(code),
   });
 
   const submitMutation = useMutation({
@@ -47,8 +49,10 @@ export default function SatisfactionSurveyPage() {
       setIsSubmitted(true);
       toast.success('Terima kasih! Penilaian Anda sangat berharga bagi kami.');
     },
-    onError: () => {
-      toast.error('Gagal mengirim kuesioner. Silakan coba lagi.');
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || 'Gagal mengirim kuesioner. Silakan coba lagi.',
+      );
     },
   });
 
@@ -96,8 +100,17 @@ export default function SatisfactionSurveyPage() {
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 space-y-8">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold font-serif">Kuesioner Kepuasan Pelapor (KSR-E)</h1>
-        <p className="text-muted-foreground">ID Aspirasi: <span className="font-mono font-bold text-primary">{code}</span></p>
+        <h1 className="text-3xl font-bold font-serif">
+          {questionnaire?.title || 'Kuesioner Kepuasan Pelapor (KSR-E)'}
+        </h1>
+        <p className="text-muted-foreground">
+          Kode: <span className="font-mono font-bold text-primary">{questionnaire?.code || code}</span>
+        </p>
+        {questionnaire?.description ? (
+          <p className="mx-auto max-w-2xl text-sm text-muted-foreground">
+            {questionnaire.description}
+          </p>
+        ) : null}
       </div>
 
       <Card className="border-t-8 border-t-emerald-600">
@@ -161,7 +174,11 @@ export default function SatisfactionSurveyPage() {
           <Button 
             onClick={() => submitMutation.mutate()} 
             className="w-full bg-emerald-600 hover:bg-emerald-700 h-12 text-lg"
-            disabled={Object.keys(answers).length < 5 || submitMutation.isPending}
+            disabled={
+              !questionnaire ||
+              Object.keys(answers).length < criteria.length ||
+              submitMutation.isPending
+            }
           >
             {submitMutation.isPending ? (
               <Loader2 className="w-5 h-5 animate-spin mr-2" />
