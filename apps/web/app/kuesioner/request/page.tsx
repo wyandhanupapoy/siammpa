@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Send, FileQuestion } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { ProtectedRoute } from '@/components/auth/protected-route';
 import {
   Form,
   FormControl,
@@ -68,115 +69,117 @@ export default function RequestQuestionnairePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-12 px-4">
-      <Card>
-        <CardHeader className="text-center">
-          <div className="mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-            <FileQuestion className="w-6 h-6 text-primary" />
-          </div>
-          <CardTitle className="text-2xl font-bold font-serif">Formulir Permintaan Kuesioner (KSR-F)</CardTitle>
-          <CardDescription>
-            Diajukan kepada Komisi Aspirasi MPA HIMAKOM POLBAN. 
-            Sesuai SOP-MPA-KSR-2026 Bab III.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <ProtectedRoute>
+      <div className="max-w-2xl mx-auto py-12 px-4">
+        <Card>
+          <CardHeader className="text-center">
+            <div className="mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+              <FileQuestion className="w-6 h-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl font-bold font-serif">Formulir Permintaan Kuesioner (KSR-F)</CardTitle>
+            <CardDescription>
+              Diajukan kepada Komisi Aspirasi MPA HIMAKOM POLBAN. 
+              Sesuai SOP-MPA-KSR-2026 Bab III.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="requesterName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Lengkap Pemohon</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Isi nama lengkap" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="requesterRole"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Jabatan / Divisi</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contoh: Ketua BPH" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="requesterName"
+                  name="contactInfo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nama Lengkap Pemohon</FormLabel>
+                      <FormLabel>Kontak yang Bisa Dihubungi</FormLabel>
                       <FormControl>
-                        <Input placeholder="Isi nama lengkap" {...field} />
+                        <Input placeholder="No. WA aktif / Email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
-                  name="requesterRole"
+                  name="purpose"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Jabatan / Divisi</FormLabel>
+                      <FormLabel>Tujuan Pengumpulan Data</FormLabel>
                       <FormControl>
-                        <Input placeholder="Contoh: Ketua BPH" {...field} />
+                        <Textarea placeholder="Jelaskan untuk apa data ini akan digunakan" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <FormField
-                control={form.control}
-                name="contactInfo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Kontak yang Bisa Dihubungi</FormLabel>
-                    <FormControl>
-                      <Input placeholder="No. WA aktif / Email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="targetRespondent"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Target Responden</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contoh: Mahasiswa JTK" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="requestedDeadline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Batas Waktu</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <FormField
-                control={form.control}
-                name="purpose"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tujuan Pengumpulan Data</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Jelaskan untuk apa data ini akan digunakan" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="targetRespondent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Target Responden</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Contoh: Mahasiswa JTK" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="requestedDeadline"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Batas Waktu</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                <Send className="w-4 h-4 mr-2" />
-                {isLoading ? 'Mengirim...' : 'Kirim Permintaan'}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Send className="w-4 h-4 mr-2" />
+                  {isLoading ? 'Mengirim...' : 'Kirim Permintaan'}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </ProtectedRoute>
   );
 }
