@@ -26,9 +26,11 @@ export class QuestionnaireController {
     private readonly importService: QuestionnaireImportService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('request')
-  async createRequest(@Body() data: any) {
-    return this.questionnaireService.createRequest(data);
+  async createRequest(@Body() data: any, @Request() req) {
+    const userId = req.user.id;
+    return this.questionnaireService.createRequest(data, userId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

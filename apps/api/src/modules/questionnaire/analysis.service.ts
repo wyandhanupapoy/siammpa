@@ -40,13 +40,16 @@ export class QuestionnaireAnalysisService {
     }
 
     const processedStats = Object.entries(stats).map(
-      ([qId, data]: [string, any]) => ({
-        questionId: qId,
-        average: data.sum / data.count,
-        total: data.count,
-        distribution: data.distribution,
-        isBelowThreshold: data.sum / data.count < 3.0, // SOP 5.3 Priority Threshold
-      }),
+      ([qId, data]: [string, any]) => {
+        const average = data.count > 0 ? data.sum / data.count : 0;
+        return {
+          questionId: qId,
+          average,
+          total: data.count,
+          distribution: data.distribution,
+          isBelowThreshold: average < 3.0, // SOP 5.3 Priority Threshold
+        };
+      },
     );
 
     return {

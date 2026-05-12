@@ -10,7 +10,7 @@ import {
 export class QuestionnaireService {
   constructor(private prisma: PrismaService) {}
 
-  async createRequest(data: any) {
+  async createRequest(data: any, userId?: string) {
     return this.prisma.questionnaireRequest.create({
       data: {
         requesterName: data.requesterName,
@@ -21,6 +21,7 @@ export class QuestionnaireService {
         estimatedCount: data.estimatedCount,
         requestedDeadline: new Date(data.requestedDeadline),
         status: RequestStatus.PENDING,
+        userId: userId || data.userId,
       },
     });
   }
@@ -113,7 +114,7 @@ export class QuestionnaireService {
   async findAll() {
     return this.prisma.questionnaire.findMany({
       include: {
-        pic: { select: { name: true } },
+        pic: true,
         analysis: true,
         request: true,
       },

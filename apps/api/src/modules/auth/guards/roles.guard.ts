@@ -15,11 +15,14 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
+    if (!user) {
+      return false;
+    }
 
     // Check if user has any of the required roles
     // The roles are nested in user.roles[].role.name
     return requiredRoles.some((role) =>
-      user.roles?.some((userRole) => userRole.role.name === role),
+      user.roles?.some((userRole) => userRole.role?.name === role),
     );
   }
 }
